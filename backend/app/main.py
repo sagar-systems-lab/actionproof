@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(
     title="ActionProof API",
     version="0.1.0",
-    description="Phase 1 runtime skeleton. Deterministic control starts in Phase 2.",
+    description="Runtime API for the ActionProof prototype.",
 )
 
 app.add_middleware(
@@ -20,6 +20,5 @@ app.add_middleware(
 def health() -> dict[str, str]:
     return {
         "status": "healthy",
-        "phase": "01-foundation",
-        "runtime": "fixture-shell",
+        "runtime": "prototype",
     }

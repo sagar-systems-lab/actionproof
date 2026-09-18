@@ -36,7 +36,7 @@ const fixtures: Record<Decision, Fixture> = {
     decision: 'ALLOW',
     headline: 'Action allowed',
     reason: 'Required context is complete, current, and satisfies the restart policy.',
-    next: 'Execute protected restart and verify the observed result postflight.',
+    next: 'Execute the protected restart and verify the observed result.',
     connection: 'CONNECTED',
     reconciliation: 'COMPLETE',
     health: 'HEALTHY',
@@ -47,9 +47,9 @@ const timeline = [
   ['12:14:01.001', 'Incident created'],
   ['12:14:01.104', 'Agent proposed restart_service'],
   ['12:14:01.106', 'Context requirements resolved'],
-  ['12:14:01.112', 'Moss retrieval placeholder — real path in Phase 3'],
-  ['12:14:01.114', 'Policy evaluation preview'],
-  ['12:14:01.115', 'Proof packet preview rendered'],
+  ['12:14:01.112', 'Context retrieved'],
+  ['12:14:01.114', 'Policy evaluated'],
+  ['12:14:01.115', 'Decision recorded'],
 ]
 
 function MissionControl({ fixture }: { fixture: Fixture }) {
@@ -100,24 +100,23 @@ function MissionControl({ fixture }: { fixture: Fixture }) {
 
       <section className="panel proof-panel">
         <div className="panel-heading">
-          <div><span className="eyebrow">ACTION PROOF</span><h2>Evidence used for this decision</h2></div>
-          <button className="ghost-button" disabled>Proof drawer · Phase 5</button>
+          <div><span className="eyebrow">ACTION PROOF</span><h2>Evidence behind this decision</h2></div>
         </div>
         <div className="proof-grid">
           <div><span>Policy</span><strong>POL-RESTART-001</strong><small>Authority: system</small></div>
-          <div><span>Live state</span><strong>{fixture.reconciliation}</strong><small>Freshness: preview</small></div>
+          <div><span>Live state</span><strong>{fixture.reconciliation}</strong><small>Current incident state</small></div>
           <div><span>Runbook</span><strong>RB-DISCONNECT-004</strong><small>Recovery sequence</small></div>
-          <div><span>Decision code</span><strong>{decisionCode}</strong><small>Deterministic in Phase 2</small></div>
+          <div><span>Decision code</span><strong>{decisionCode}</strong><small>Policy result</small></div>
         </div>
       </section>
 
       <section className="panel latency-panel">
-        <div className="panel-heading"><div><span className="eyebrow">LATENCY</span><h2>Preflight budget</h2></div></div>
+        <div className="panel-heading"><div><span className="eyebrow">LATENCY</span><h2>Preflight timing</h2></div></div>
         <div className="metric-grid">
-          <div><span>Moss retrieval</span><strong>Phase 3</strong></div>
-          <div><span>Total preflight</span><strong>Phase 3</strong></div>
+          <div><span>Retrieval</span><strong>—</strong></div>
+          <div><span>Total preflight</span><strong>—</strong></div>
         </div>
-        <p className="muted">No fabricated measurements. Real timing appears only after the real Moss path exists.</p>
+        <p className="muted">Timing stays blank until it is measured from the real runtime.</p>
       </section>
 
       <section className="panel timeline-panel">
@@ -142,22 +141,23 @@ function ScenarioLab() {
     ['Safe Restart', 'Connected · reconciled · healthy', 'ALLOW'],
     ['Unsafe Restart', 'Disconnected · reconciliation incomplete', 'BLOCK'],
     ['Missing Context', 'Required state unavailable', 'CONFIRM'],
-    ['Stale Context', 'Required state exceeded freshness TTL', 'BLOCK'],
+    ['Stale Context', 'Required state is too old to trust', 'BLOCK'],
     ['Successful Recovery', 'Reconcile → verify → retry restart', 'ALLOW'],
   ]
+
   return (
     <main className="page-stack">
       <div className="page-intro">
         <span className="eyebrow">SCENARIO LAB</span>
-        <h1>Five deterministic stories. No demo roulette.</h1>
-        <p>Phase 1 renders the product contract. Runtime execution becomes real in Phases 2–4.</p>
+        <h1>Repeatable incident scenarios</h1>
+        <p>These scenarios keep the demo reproducible while the runtime is connected underneath them.</p>
       </div>
       <section className="scenario-grid">
         {scenarios.map(([name, state, expected]) => (
           <article className="scenario-card" key={name}>
             <span className="expected">Expected · {expected}</span>
             <h2>{name}</h2><p>{state}</p>
-            <button disabled>Run in Phase 4</button>
+            <button disabled>Not wired yet</button>
           </article>
         ))}
       </section>
@@ -170,8 +170,8 @@ function LatencyLab() {
     <main className="page-stack">
       <div className="page-intro">
         <span className="eyebrow">LATENCY LAB</span>
-        <h1>Measure the safety tax. Do not invent it.</h1>
-        <p>The benchmark surface exists now; real Moss and total-preflight distributions appear only after the critical path exists.</p>
+        <h1>Retrieval and preflight timing</h1>
+        <p>This view will report measured latency once the real retrieval and decision path is connected.</p>
       </div>
       <section className="panel empty-lab">
         <div className="metric-grid wide">
@@ -180,7 +180,7 @@ function LatencyLab() {
           <div><span>p99</span><strong>—</strong></div>
           <div><span>max</span><strong>—</strong></div>
         </div>
-        <div className="empty-chart"><span>Measured distribution will appear here in Phase 6.</span></div>
+        <div className="empty-chart"><span>No benchmark run yet.</span></div>
       </section>
     </main>
   )
@@ -198,7 +198,7 @@ export default function App() {
           <span className="brand-mark">AP</span>
           <div><strong>ActionProof</strong><small>Context proof before consequential action</small></div>
         </div>
-        <div className="phase-badge">PHASE 1 · FIXTURE SHELL</div>
+        <div className="phase-badge">LOCAL PROTOTYPE</div>
       </header>
 
       <nav className="nav-bar">

@@ -1,46 +1,43 @@
-# ActionProof — Product Requirements Document V1
+# Product requirements
 
-## Product statement
+## Goal
 
-**ActionProof is a real-time context-proof and safety gate for AI agents.** Every consequential action must arrive with enough current evidence to justify execution.
+Make high-impact AI-agent actions inspectable and safe to execute without turning every tool call into a slow manual review.
 
-## Problem
+## Core user
 
-AI agents increasingly invoke tools that restart services, deploy software, modify infrastructure, alter records, or perform financial workflows. A model can generate a plausible action while operating on missing, stale, or incomplete operational context. Valid tool permission therefore does not imply that an action is safe *right now*.
+An engineer or operator running an AI agent that can change production state.
 
-## Target users
+## Main workflow
 
-Teams operating AI agents that can change production systems or invoke consequential tools: DevOps/SRE, cloud operations, cybersecurity response, autonomous developer tooling, financial workflow automation, and trading-infrastructure operations.
+1. Agent proposes a tool action.
+2. ActionProof determines what evidence is required.
+3. Moss retrieves the relevant policy, state, and runbook.
+4. Retrieved context is checked for authority and freshness.
+5. Deterministic policy returns ALLOW, CONFIRM, or BLOCK.
+6. The UI shows the reason and evidence.
+7. Allowed actions run through a protected executor.
+8. The result is checked again after execution.
 
-## Core job
+## First scenario
 
-Before a high-impact action executes, determine whether current evidence is sufficient and policy-compliant, make the decision inspectable, and verify the result after execution.
+A service disconnects while reconciliation is incomplete. The agent proposes a restart. ActionProof blocks it, recommends reconciliation, verifies the recovery, then allows the restart when the state is safe.
 
-## V1 functional requirements
+## Required product surfaces
 
-1. Normalize intent into a typed action.
-2. Resolve required evidence.
-3. Retrieve policy, state and recovery context with Moss.
-4. Validate authority, version, scope and freshness.
-5. Produce deterministic ALLOW / CONFIRM / BLOCK.
-6. Generate an immutable Action Proof Packet.
-7. Prevent protected-tool execution without valid authorization.
-8. Verify expected versus observed state postflight.
-9. Make updated state retrievable.
-10. Expose reason, evidence, safe next action, trace and latency in UI.
-
-## Product surfaces
-
-Mission Control; Proof Inspector; Scenario Lab; Latency Lab.
+- Mission Control
+- Proof Inspector
+- Scenario Lab
+- Latency Lab
 
 ## Reliability requirements
 
-Fail closed on unverifiable high-impact context; stale required state cannot authorize; LLM cannot override policy; no direct tool bypass; displayed latency and evidence must be real.
+- no direct path from agent to protected tool
+- missing or stale required context cannot silently authorize a high-impact action
+- LLM output cannot override deterministic policy
+- UI evidence must match the evidence used by the decision
+- published latency must come from measured runtime data
 
-## Non-goals
+## Out of scope
 
-No real-money trading, exchange credentials, Kubernetes, distributed consensus, custom vector database/model, FPGA/kernel tuning, voice pipeline, or multi-agent swarm.
-
-## Success criterion
-
-A judge can trigger the unsafe incident, see ActionProof block it with evidence, execute reconciliation, observe postflight verification, retry and see ALLOW, inspect proof, and run latency measurement without a terminal.
+Real-money trading, exchange credentials, custom model training, distributed consensus, kernel tuning, and unrelated infrastructure complexity.
