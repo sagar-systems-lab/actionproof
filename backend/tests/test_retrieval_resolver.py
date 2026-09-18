@@ -3,7 +3,7 @@ from app.models.action import ActionIntent, Operation
 from app.retrieval.resolver import ContextRequirementResolver
 
 
-def test_restart_resolver_queries_only_required_domains(
+def test_restart_resolver_keeps_optional_history_off_the_hot_path(
     restart_intent: ActionIntent,
 ) -> None:
     action = ActionNormalizer().normalize(restart_intent)
@@ -13,11 +13,9 @@ def test_restart_resolver_queries_only_required_domains(
         "restart_policy",
         "current_state",
         "recovery_runbook",
-        "incident_history",
     ]
-    assert requirements[0].required is True
+    assert all(item.required for item in requirements)
     assert requirements[1].incident_scoped is True
-    assert requirements[3].required is False
 
 
 def test_resume_resolver_is_operation_specific(

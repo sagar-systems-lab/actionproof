@@ -19,10 +19,6 @@ class ContextRequirementResolver:
                     "recovery_runbook",
                     "disconnect recovery restart service reconciliation procedure",
                 ),
-                self._history(
-                    "incident_history",
-                    "similar disconnect incident restart recovery",
-                ),
             )
 
         if action.operation is Operation.RECONCILE:
@@ -101,15 +97,4 @@ class ContextRequirementResolver:
             domain=RetrievalDomain.KNOWLEDGE,
             source_types=(SourceType.RUNBOOK,),
             query=query,
-        )
-
-    @staticmethod
-    def _history(key: str, query: str) -> ContextRequirement:
-        return ContextRequirement(
-            key=key,
-            domain=RetrievalDomain.KNOWLEDGE,
-            source_types=(SourceType.HISTORY,),
-            query=query,
-            required=False,
-            top_k=2,
         )
