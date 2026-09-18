@@ -64,17 +64,13 @@ button { font: inherit; }
 .brand-copy span { color: #9fb5c8; font-size: 11px; }
 
 .header-actions { display: flex; align-items: center; gap: 4px; }
-.header-button {
-  border: 0;
-  background: transparent;
-  color: #c9d6e1;
-  padding: 7px 9px;
-  border-radius: 7px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: background .16s ease, color .16s ease;
+.header-runtime {
+  color: #9fb5c8;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
 }
-.header-button:hover { background: rgba(255,255,255,.08); color: #fff; }
 .header-divider { width: 1px; height: 20px; margin: 0 7px; background: rgba(255,255,255,.12); }
 .header-user {
   width: 30px; height: 30px; display: grid; place-items: center;
