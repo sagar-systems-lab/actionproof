@@ -12,6 +12,10 @@ Allowed actions execute through a protected runtime and are checked again after 
 
 Built for **YC Fall 2026 × Moss — The Zero Latency Builder Sprint**.
 
+**Live demo:** https://actionproof.onrender.com  
+**Architecture:** [docs/architecture.md](docs/architecture.md)  
+**Product requirements:** [docs/prd.md](docs/prd.md)
+
 ## Why it exists
 
 An agent can have valid credentials and still make the wrong operational move because its context is stale, incomplete, or missing.
