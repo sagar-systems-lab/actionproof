@@ -14,6 +14,15 @@ if str(BACKEND) not in sys.path:
 
 from app.core.config import MossSettings
 from app.models.action import ActionIntent
+from app.models.decision import DecisionCode
+from app.models.state import (
+    ConnectionState,
+    HealthState,
+    OutstandingState,
+    ReconciliationState,
+    ServiceState,
+    SimulatorState,
+)
 from app.retrieval.engine import RetrievalActionProofEngine
 from app.retrieval.moss_client import MossClient
 from app.retrieval.retriever import MossContextRetriever
@@ -24,6 +33,15 @@ async def main() -> None:
     settings = MossSettings.from_env()
     client = MossClient(settings)
     await client.start()
+
+    unsafe_state = SimulatorState(
+        connection=ConnectionState.DISCONNECTED,
+        reconciliation=ReconciliationState.INCOMPLETE,
+        service=ServiceState.RUNNING,
+        health=HealthState.DEGRADED,
+        outstanding=OutstandingState.UNKNOWN,
+    )
+    await client.upsert_live_state("INC-104", unsafe_state, version="verify")
 
     engine = RetrievalActionProofEngine(
         MossContextRetriever(
@@ -57,8 +75,10 @@ async def main() -> None:
     print(f"retrieval_us={result.proof.latency.retrieval_us}")
     print(f"total_preflight_us={result.proof.latency.total_us}")
 
-    if result.decision.status.value != "BLOCK":
-        raise SystemExit("expected hero restart to be blocked")
+    if result.decision.code is not DecisionCode.BLOCK_RECONCILIATION_REQUIRED:
+        raise SystemExit(
+            "expected fresh unsafe state to block on incomplete reconciliation"
+        )
     if not {"policy", "runbook", "live_state"}.issubset(source_types):
         raise SystemExit("required Moss evidence classes were not retrieved")
 
