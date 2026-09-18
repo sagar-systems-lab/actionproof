@@ -1,0 +1,14 @@
+{
+  "scenario_id": "unsafe-restart",
+  "title": "Disconnected with incomplete reconciliation",
+  "state": {
+    "connection": "DISCONNECTED",
+    "reconciliation": "INCOMPLETE",
+    "outstanding_state": "UNKNOWN",
+    "health": "DEGRADED"
+  },
+  "proposed_action": "restart_service",
+  "expected_decision": "BLOCK",
+  "safe_next_action": "run_reconciliation",
+  "phase": "fixture-only"
+}
