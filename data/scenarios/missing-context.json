@@ -1,0 +1,24 @@
+{
+  "scenario_id": "missing-context",
+  "title": "Required state is unavailable",
+  "request": {
+    "intent": {
+      "action_id": "ACT-MISSING-001",
+      "trace_id": "TRACE-MISSING-001",
+      "actor": "operations-agent",
+      "text": "Restart the service.",
+      "incident_id": "INC-MISSING-001",
+      "timestamp": "2026-09-18T08:15:00Z"
+    },
+    "context": {
+      "state": null,
+      "required_context_complete": false,
+      "freshness": "UNKNOWN",
+      "policy_available": true
+    }
+  },
+  "expected": {
+    "decision": "CONFIRM",
+    "code": "CONFIRM_CONTEXT_INCOMPLETE"
+  }
+}

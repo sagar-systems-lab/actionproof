@@ -1,0 +1,30 @@
+{
+  "scenario_id": "safe-restart",
+  "title": "Restart from a reconciled state",
+  "request": {
+    "intent": {
+      "action_id": "ACT-SAFE-001",
+      "trace_id": "TRACE-SAFE-001",
+      "actor": "operations-agent",
+      "text": "Restart the service.",
+      "incident_id": "INC-SAFE-001",
+      "timestamp": "2026-09-18T08:15:00Z"
+    },
+    "context": {
+      "state": {
+        "connection": "CONNECTED",
+        "reconciliation": "COMPLETE",
+        "service": "RUNNING",
+        "health": "HEALTHY",
+        "outstanding": "CLEAR"
+      },
+      "required_context_complete": true,
+      "freshness": "FRESH",
+      "policy_available": true
+    }
+  },
+  "expected": {
+    "decision": "ALLOW",
+    "code": "ALLOW_SAFE_STATE"
+  }
+}

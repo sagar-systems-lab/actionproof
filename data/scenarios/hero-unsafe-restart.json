@@ -9,6 +9,5 @@
   },
   "proposed_action": "restart_service",
   "expected_decision": "BLOCK",
-  "safe_next_action": "run_reconciliation",
-  "phase": "fixture-only"
+  "safe_next_action": "run_reconciliation"
 }

@@ -1,0 +1,30 @@
+{
+  "scenario_id": "unsafe-restart",
+  "title": "Disconnected with incomplete reconciliation",
+  "request": {
+    "intent": {
+      "action_id": "ACT-UNSAFE-001",
+      "trace_id": "TRACE-UNSAFE-001",
+      "actor": "operations-agent",
+      "text": "Restart the service.",
+      "incident_id": "INC-104",
+      "timestamp": "2026-09-18T08:15:00Z"
+    },
+    "context": {
+      "state": {
+        "connection": "DISCONNECTED",
+        "reconciliation": "INCOMPLETE",
+        "service": "RUNNING",
+        "health": "DEGRADED",
+        "outstanding": "UNKNOWN"
+      },
+      "required_context_complete": true,
+      "freshness": "FRESH",
+      "policy_available": true
+    }
+  },
+  "expected": {
+    "decision": "BLOCK",
+    "code": "BLOCK_RECONCILIATION_REQUIRED"
+  }
+}
