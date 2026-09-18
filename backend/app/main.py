@@ -5,7 +5,7 @@ from app.api import actions_router, retrieval_router, runtime_router
 
 app = FastAPI(
     title="ActionProof API",
-    version="0.4.0",
+    version="0.5.0",
     description="Runtime API for the ActionProof prototype.",
 )
 
