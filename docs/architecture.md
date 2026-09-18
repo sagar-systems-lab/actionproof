@@ -8,8 +8,8 @@ Agent
   v
 ActionProof
   |
-  +-- determine required context
-  +-- retrieve context with Moss
+  +-- determine required evidence
+  +-- retrieve evidence with Moss
   +-- validate freshness / authority
   +-- apply deterministic policy
   |
@@ -20,31 +20,88 @@ ALLOW / CONFIRM / BLOCK
 Protected tool
   |
   v
-Postflight check
+Postflight verification
+  |
+  v
+Updated live state
 ```
 
-## Why the decision is deterministic
+## Decision authority
 
-The model can propose an action, but the final authorization result is produced from structured state, trusted policy, and retrieved evidence.
+The agent can propose an action, but the final authorization result is produced from structured state, trusted policy, and retrieved evidence.
 
-That keeps the safety decision reproducible and avoids making an LLM the final authority over a high-impact tool call.
+An LLM is not the final authority over a high-impact tool call.
 
-## Retrieval
+## Moss retrieval
 
-The retrieval layer is split into three kinds of context:
+The protected path uses three evidence domains:
 
 - policy
-- runbooks / incident history
-- current operational state
+- runbook / operational knowledge
+- current live state
 
-The runtime only asks for evidence relevant to the proposed action. A restart, for example, needs restart policy, connection state, reconciliation state, and the recovery runbook.
+ActionProof defaults to Moss **SessionIndex** mode for the runtime hot path. Canonical policy and runbook documents are seeded into local Moss sessions at process startup, live state is maintained in its own Moss session, and the resolver retrieves only evidence required by the proposed action.
 
-Retrieved documents are checked for metadata such as source, version, environment, incident scope, and freshness before they can influence the decision.
+Cloud-backed Moss indexes remain supported through `MOSS_RUNTIME_MODE=cloud`. Runtime semantics are the same in either mode.
 
-## Failure behavior
+A restart currently requires:
 
-High-impact actions do not silently fall through to ALLOW when required context is missing, stale, or unavailable.
+- restart policy
+- current connection and reconciliation state
+- recovery runbook
+
+Optional incident history remains available as knowledge but is not allowed to add latency to a decision it cannot change.
+
+## Evidence validation
+
+Retrieved documents are validated before they influence policy. Validation covers:
+
+- source type
+- authority
+- version
+- environment
+- incident scope
+- updated timestamp
+- freshness TTL
+
+Missing or stale required context cannot silently authorize a high-impact action.
+
+## Protected execution
+
+Only an ALLOW result can issue an execution authorization. The executor rejects direct calls that do not carry that authorization.
 
 ## Postflight
 
-An allowed action is not considered complete just because the tool returned success. ActionProof compares expected state with observed state, records the result, and updates the operational context used by the next decision.
+Tool success is not treated as final truth. ActionProof compares the expected transition with observed state, records the postflight result, and updates the operational state used by the next decision.
+
+The hero recovery path is therefore closed-loop:
+
+```text
+unsafe restart
+    ↓
+BLOCK
+    ↓
+reconcile
+    ↓
+postflight VERIFIED
+    ↓
+state update
+    ↓
+retry restart
+    ↓
+ALLOW
+```
+
+## Measurement
+
+Preflight timing uses monotonic nanosecond clocks for:
+
+- normalization
+- context requirement resolution
+- Moss retrieval
+- freshness validation
+- deterministic policy evaluation
+- proof construction
+- total preflight
+
+The Latency Lab reports observed p50 / p95 / p99 / max and error rate from repeatable runs. Setup writes are excluded from timed samples.
