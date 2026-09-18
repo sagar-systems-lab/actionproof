@@ -108,6 +108,26 @@ Open `http://localhost:5173`.
 
 The production frontend proxies `/api` and the runtime event stream to the backend. The backend image includes the canonical policy, runbook, and scenario datasets required to seed local Moss sessions.
 
+## Hosted deployment
+
+ActionProof can be deployed as a small backend web service plus a static frontend.
+
+Backend requirements:
+
+- build from `backend/Dockerfile` with the repository root as Docker context
+- set `MOSS_PROJECT_ID` and `MOSS_PROJECT_KEY`
+- keep `MOSS_RUNTIME_MODE=local` for the in-process Moss SessionIndex path
+- set `ACTIONPROOF_ALLOWED_ORIGINS` to the public frontend origin
+
+Frontend requirements:
+
+- build from `frontend`
+- run `npm install && npm run build`
+- publish `frontend/dist`
+- set `VITE_API_URL` to the public backend URL
+
+The backend honors the platform-provided `PORT` environment variable.
+
 ## Verification
 
 ```bash
