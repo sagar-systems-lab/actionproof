@@ -126,3 +126,50 @@ export type RetrievalStatus = {
     live_state: string
   }
 }
+
+export type BenchmarkScenario = 'safe' | 'unsafe' | 'mixed'
+
+export type LatencyDistribution = {
+  p50_ns: number
+  p95_ns: number
+  p99_ns: number
+  max_ns: number
+}
+
+export type BenchmarkMetrics = {
+  normalization: LatencyDistribution
+  context_resolve: LatencyDistribution
+  moss_retrieval: LatencyDistribution
+  freshness: LatencyDistribution
+  policy_eval: LatencyDistribution
+  proof_build: LatencyDistribution
+  total_preflight: LatencyDistribution
+}
+
+export type BenchmarkRun = {
+  run_id: string
+  revision: string
+  environment: string
+  timestamp: string
+  scenario: BenchmarkScenario
+  warmup: number
+  iterations: number
+  errors: number
+  error_rate: number
+  percentile_method: string
+  metrics: BenchmarkMetrics
+  result_file: string
+}
+
+export type BenchmarkJob = {
+  job_id: string
+  state: 'running' | 'completed' | 'failed'
+  scenario: BenchmarkScenario
+  iterations: number
+  warmup: number
+  completed_iterations: number
+  completed_warmup: number
+  elapsed_seconds: number
+  message: string
+  result: BenchmarkRun | null
+}

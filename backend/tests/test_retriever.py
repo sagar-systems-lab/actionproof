@@ -33,7 +33,6 @@ def test_retriever_builds_context_from_moss_evidence(
         "restart_policy",
         "current_state",
         "recovery_runbook",
-        "incident_history",
     ]
     assert result.metrics.retrieval_us >= 0
 

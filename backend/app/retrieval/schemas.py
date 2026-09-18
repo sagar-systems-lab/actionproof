@@ -85,6 +85,10 @@ class RetrievalIssue(BaseModel):
 class RetrievalMetrics(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
+    context_resolve_ns: int
+    moss_retrieval_ns: int
+    freshness_ns: int
+
     retrieval_us: int
     freshness_us: int
 

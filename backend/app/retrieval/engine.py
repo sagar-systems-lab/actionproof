@@ -32,7 +32,11 @@ class RetrievalActionProofEngine:
 
     async def evaluate(self, intent: ActionIntent) -> EvaluationResult:
         total_started = perf_counter_ns()
+
+        normalization_started = perf_counter_ns()
         action = self.normalizer.normalize(intent)
+        normalization_ns = perf_counter_ns() - normalization_started
+
         self._record(
             RuntimeEventType.ACTION_NORMALIZED,
             action.trace_id,
@@ -65,7 +69,7 @@ class RetrievalActionProofEngine:
 
         policy_started = perf_counter_ns()
         decision = self.policy.evaluate(action, retrieval.context)
-        policy_us = (perf_counter_ns() - policy_started) // 1_000
+        policy_eval_ns = perf_counter_ns() - policy_started
         self._record(
             RuntimeEventType.POLICY_EVALUATED,
             action.trace_id,
@@ -79,14 +83,22 @@ class RetrievalActionProofEngine:
             decision,
             evidence=self._proof_evidence(retrieval),
         )
-        proof_us = (perf_counter_ns() - proof_started) // 1_000
+        proof_build_ns = perf_counter_ns() - proof_started
 
+        total_preflight_ns = perf_counter_ns() - total_started
         latency = LatencyBreakdown(
-            retrieval_us=retrieval.metrics.retrieval_us,
-            freshness_us=retrieval.metrics.freshness_us,
-            policy_us=int(policy_us),
-            proof_us=int(proof_us),
-            total_us=int((perf_counter_ns() - total_started) // 1_000),
+            normalization_ns=int(normalization_ns),
+            context_resolve_ns=retrieval.metrics.context_resolve_ns,
+            moss_retrieval_ns=retrieval.metrics.moss_retrieval_ns,
+            freshness_ns=retrieval.metrics.freshness_ns,
+            policy_eval_ns=int(policy_eval_ns),
+            proof_build_ns=int(proof_build_ns),
+            total_preflight_ns=int(total_preflight_ns),
+            retrieval_us=int(retrieval.metrics.moss_retrieval_ns // 1_000),
+            freshness_us=int(retrieval.metrics.freshness_ns // 1_000),
+            policy_us=int(policy_eval_ns // 1_000),
+            proof_us=int(proof_build_ns // 1_000),
+            total_us=int(total_preflight_ns // 1_000),
         )
         proof = proof.model_copy(update={"latency": latency})
         self._record(

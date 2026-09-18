@@ -54,6 +54,12 @@ async def main() -> None:
     settings = MossSettings.from_env()
     client = MossClient(settings)
 
+    if settings.runtime_mode == "local":
+        await client.start()
+        print("Moss local runtime seeded from repository datasets.")
+        print("No cloud index mutation was performed.")
+        return
+
     for setting_name, path in DATASETS:
         index_name = getattr(settings, setting_name)
         documents = load_documents(path, settings.environment)
@@ -61,7 +67,7 @@ async def main() -> None:
         await client.ensure_index(index_name, documents)
 
     await client.start()
-    print("Moss indexes seeded; semantic indexes preloaded.")
+    print("Moss cloud indexes seeded; semantic indexes preloaded.")
 
 
 if __name__ == "__main__":

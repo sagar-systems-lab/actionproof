@@ -15,6 +15,7 @@ def retrieval_status() -> dict[str, object]:
         return {
             "configured": False,
             "environment": "production",
+            "runtime_mode": "local",
             "indexes": {
                 "policy": "actionproof-policy",
                 "knowledge": "actionproof-knowledge",
@@ -25,6 +26,7 @@ def retrieval_status() -> dict[str, object]:
     return {
         "configured": True,
         "environment": settings.environment,
+        "runtime_mode": settings.runtime_mode,
         "indexes": {
             "policy": settings.policy_index,
             "knowledge": settings.knowledge_index,

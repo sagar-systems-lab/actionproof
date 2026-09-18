@@ -27,6 +27,7 @@ export default function App() {
   const [events, setEvents] = useState<RuntimeEvent[]>([])
   const [streamLive, setStreamLive] = useState(false)
   const [runningId, setRunningId] = useState<string | null>(null)
+  const [runStartedAt, setRunStartedAt] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [proofOpen, setProofOpen] = useState(false)
   const [showingFinal, setShowingFinal] = useState(false)
@@ -73,6 +74,7 @@ export default function App() {
 
   async function executeScenario(id: string, navigate = true) {
     setRunningId(id)
+    setRunStartedAt(Date.now())
     setError(null)
     setShowingFinal(false)
     setEvents([])
@@ -86,6 +88,7 @@ export default function App() {
       setError(productError(cause))
     } finally {
       setRunningId(null)
+      setRunStartedAt(null)
     }
   }
 
@@ -140,6 +143,7 @@ export default function App() {
         </div>
       )}
 
+      <div className="page-motion" key={page}>
       {page === 'Mission' && (
         <MissionControl
           result={result}
@@ -160,6 +164,8 @@ export default function App() {
           scenarios={scenarios}
           result={result}
           runningId={runningId}
+          runStartedAt={runStartedAt}
+          events={events}
           apiOnline={apiOnline}
           onRun={(id) => executeScenario(id)}
         />
@@ -168,6 +174,7 @@ export default function App() {
       {page === 'Latency' && (
         <LatencyLab result={result} showingFinal={showingFinal} />
       )}
+      </div>
 
       <ProofDrawer
         evaluation={activeEvaluation}
