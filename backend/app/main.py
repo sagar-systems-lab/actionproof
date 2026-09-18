@@ -1,11 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import actions_router, retrieval_router
+from app.api import actions_router, retrieval_router, runtime_router
 
 app = FastAPI(
     title="ActionProof API",
-    version="0.3.0",
+    version="0.4.0",
     description="Runtime API for the ActionProof prototype.",
 )
 
@@ -19,6 +19,7 @@ app.add_middleware(
 
 app.include_router(actions_router)
 app.include_router(retrieval_router)
+app.include_router(runtime_router)
 
 
 @app.get("/api/health")
