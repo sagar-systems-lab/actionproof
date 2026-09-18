@@ -1001,3 +1001,94 @@ code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
   background: #2d67d8;
   transition: width .25s ease;
 }
+
+.scenario-line.scenario-running {
+  background: #f7faff;
+}
+
+.scenario-run-status {
+  margin-top: 14px;
+  padding: 14px 16px;
+  overflow: hidden;
+}
+
+.scenario-run-head,
+.scenario-run-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.scenario-run-head > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scenario-run-head strong {
+  color: #26394d;
+  font-size: 12px;
+}
+
+.scenario-run-head > span,
+.scenario-run-meta span {
+  color: #728195;
+  font-size: 9px;
+}
+
+.scenario-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #2d67d8;
+  box-shadow: 0 0 0 4px #edf4ff;
+}
+
+.scenario-run-stage {
+  margin-top: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.scenario-run-stage strong {
+  color: #2b4057;
+  font-size: 11px;
+}
+
+.scenario-run-stage span {
+  color: #68798b;
+  font-size: 10px;
+}
+
+.scenario-run-track {
+  height: 6px;
+  margin: 11px 0 9px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e9eef5;
+}
+
+.scenario-run-track > div {
+  width: 34%;
+  height: 100%;
+  border-radius: inherit;
+  background: #2d67d8;
+  animation: scenario-progress 1.15s ease-in-out infinite;
+}
+
+@keyframes scenario-progress {
+  0% { transform: translateX(-105%); }
+  55% { transform: translateX(195%); }
+  100% { transform: translateX(310%); }
+}
+
+@media (max-width: 820px) {
+  .scenario-run-head,
+  .scenario-run-meta {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+}
