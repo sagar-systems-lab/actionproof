@@ -6,7 +6,7 @@ from app.models.context import ContextFreshness
 from app.retrieval.retriever import MossContextRetriever
 from app.retrieval.schemas import RetrievalIssueCode, SourceType
 
-from retrieval_fakes import FakeMossBackend
+from tests.retrieval_fakes import FakeMossBackend
 
 
 def test_retriever_builds_context_from_moss_evidence(
