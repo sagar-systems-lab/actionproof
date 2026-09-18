@@ -1,133 +1,182 @@
 import { useMemo, useState } from 'react'
 
 type Decision = 'ALLOW' | 'CONFIRM' | 'BLOCK'
-type Page = 'Mission Control' | 'Scenario Lab' | 'Latency Lab'
+type Page = 'Mission' | 'Scenarios' | 'Latency'
 
 type Fixture = {
   decision: Decision
-  headline: string
+  title: string
   reason: string
   next: string
   connection: string
   reconciliation: string
   health: string
+  code: string
 }
 
 const fixtures: Record<Decision, Fixture> = {
+  ALLOW: {
+    decision: 'ALLOW',
+    title: 'Restart authorized',
+    reason: 'Connection is stable and reconciliation is complete.',
+    next: 'Execute restart, then verify the observed service state.',
+    connection: 'CONNECTED',
+    reconciliation: 'COMPLETE',
+    health: 'HEALTHY',
+    code: 'ALLOW_SAFE_STATE',
+  },
+  CONFIRM: {
+    decision: 'CONFIRM',
+    title: 'Operator confirmation required',
+    reason: 'The reconciliation state cannot be established from current evidence.',
+    next: 'Refresh operational state or confirm the action manually.',
+    connection: 'CONNECTED',
+    reconciliation: 'UNKNOWN',
+    health: 'DEGRADED',
+    code: 'CONFIRM_CONTEXT_INCOMPLETE',
+  },
   BLOCK: {
     decision: 'BLOCK',
-    headline: 'Action blocked',
-    reason: 'Restart requires completed reconciliation. Current reconciliation state is INCOMPLETE.',
+    title: 'Restart blocked',
+    reason: 'Reconciliation is incomplete. Restarting now may leave external state unresolved.',
     next: 'Run reconciliation before restarting the service.',
     connection: 'DISCONNECTED',
     reconciliation: 'INCOMPLETE',
     health: 'DEGRADED',
-  },
-  CONFIRM: {
-    decision: 'CONFIRM',
-    headline: 'Confirmation required',
-    reason: 'Required operational context is incomplete. ActionProof cannot establish a safe authorization state.',
-    next: 'Refresh state or request explicit operator confirmation.',
-    connection: 'CONNECTED',
-    reconciliation: 'UNKNOWN',
-    health: 'DEGRADED',
-  },
-  ALLOW: {
-    decision: 'ALLOW',
-    headline: 'Action allowed',
-    reason: 'Required context is complete, current, and satisfies the restart policy.',
-    next: 'Execute the protected restart and verify the observed result.',
-    connection: 'CONNECTED',
-    reconciliation: 'COMPLETE',
-    health: 'HEALTHY',
+    code: 'BLOCK_RECONCILIATION_REQUIRED',
   },
 }
 
-const timeline = [
-  ['12:14:01.001', 'Incident created'],
-  ['12:14:01.104', 'Agent proposed restart_service'],
-  ['12:14:01.106', 'Context requirements resolved'],
-  ['12:14:01.112', 'Context retrieved'],
-  ['12:14:01.114', 'Policy evaluated'],
-  ['12:14:01.115', 'Decision recorded'],
+const events = [
+  ['12:14:01.001', 'incident.opened', 'connection dropped'],
+  ['12:14:01.104', 'agent.intent', 'restart_service'],
+  ['12:14:01.106', 'context.plan', 'policy + state + runbook'],
+  ['12:14:01.112', 'context.ready', '3 evidence records'],
+  ['12:14:01.114', 'policy.result', 'restart policy evaluated'],
+  ['12:14:01.115', 'decision.recorded', 'proof AP-104 written'],
 ]
 
-function MissionControl({ fixture }: { fixture: Fixture }) {
-  const decisionCode =
-    fixture.decision === 'BLOCK'
-      ? 'BLOCK_RECONCILIATION_REQUIRED'
-      : fixture.decision === 'ALLOW'
-        ? 'ALLOW_SAFE_STATE'
-        : 'CONFIRM_CONTEXT_INCOMPLETE'
+function StatusValue({ value }: { value: string }) {
+  const cls = value === 'HEALTHY' || value === 'CONNECTED' || value === 'COMPLETE'
+    ? 'good'
+    : value === 'UNKNOWN'
+      ? 'warn'
+      : 'bad'
+  return <span className={`status-value ${cls}`}>{value}</span>
+}
 
+function MissionView({ fixture }: { fixture: Fixture }) {
   return (
-    <main className="content-grid">
-      <section className={`decision-hero decision-${fixture.decision.toLowerCase()}`}>
-        <div className="eyebrow">CURRENT DECISION</div>
-        <div className="decision-row">
+    <main className="workspace">
+      <aside className="left-rail">
+        <div className="section-title">
+          <span>INCIDENT</span>
+          <strong>INC-104</strong>
+        </div>
+
+        <div className="incident-summary">
+          <div className="incident-kicker">execution-service</div>
+          <h2>Connection recovery</h2>
+          <p>Agent is attempting a protected restart while service state is degraded.</p>
+        </div>
+
+        <div className="state-table">
+          <div><span>Connection</span><StatusValue value={fixture.connection} /></div>
+          <div><span>Reconciliation</span><StatusValue value={fixture.reconciliation} /></div>
+          <div><span>Health</span><StatusValue value={fixture.health} /></div>
+        </div>
+
+        <div className="rail-note">
+          <span>Actor</span>
+          <strong>operations-agent</strong>
+          <span>Resource</span>
+          <strong>execution-service</strong>
+        </div>
+      </aside>
+
+      <section className="decision-pane">
+        <div className={`decision-strip state-${fixture.decision.toLowerCase()}`}>
           <div>
-            <h1>{fixture.headline}</h1>
+            <span className="mono-label">DECISION / {fixture.code}</span>
+            <h1>{fixture.title}</h1>
+          </div>
+          <strong className="decision-state">{fixture.decision}</strong>
+        </div>
+
+        <div className="decision-body">
+          <div className="intent-row">
+            <span className="mono-label">PROPOSED TOOL CALL</span>
+            <code>restart_service()</code>
+          </div>
+
+          <div className="reason-block">
+            <span className="mono-label">WHY</span>
             <p>{fixture.reason}</p>
           </div>
-          <span className="decision-pill">{fixture.decision}</span>
-        </div>
-        <div className="next-action">
-          <span>Safe next action</span>
-          <strong>{fixture.next}</strong>
+
+          <div className="next-block">
+            <span className="mono-label">SAFE NEXT ACTION</span>
+            <p>{fixture.next}</p>
+          </div>
+
+          <div className="timing-row">
+            <div>
+              <span className="mono-label">RETRIEVAL</span>
+              <strong>—</strong>
+              <small>not measured</small>
+            </div>
+            <div>
+              <span className="mono-label">POLICY</span>
+              <strong>—</strong>
+              <small>not measured</small>
+            </div>
+            <div>
+              <span className="mono-label">TOTAL PREFLIGHT</span>
+              <strong>—</strong>
+              <small>not measured</small>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="panel state-panel">
-        <div className="panel-heading">
-          <div><span className="eyebrow">LIVE STATE</span><h2>Production incident</h2></div>
-          <span className="state-chip">INC-104</span>
+      <aside className="right-rail">
+        <div className="section-title">
+          <span>EVIDENCE</span>
+          <strong>3 records</strong>
         </div>
-        <dl className="state-list">
-          <div><dt>Connection</dt><dd>{fixture.connection}</dd></div>
-          <div><dt>Reconciliation</dt><dd>{fixture.reconciliation}</dd></div>
-          <div><dt>Health</dt><dd>{fixture.health}</dd></div>
-        </dl>
-      </section>
 
-      <section className="panel action-panel">
-        <div className="panel-heading">
-          <div><span className="eyebrow">AGENT INTENT</span><h2>Protected action</h2></div>
-          <span className="risk-chip">HIGH IMPACT</span>
-        </div>
-        <code className="action-code">restart_service()</code>
-        <p className="muted">Actor: operations-agent · Resource: execution-service</p>
-      </section>
+        <div className="evidence-list">
+          <article>
+            <div><span className="evidence-type">POLICY</span><strong>POL-RESTART-001</strong></div>
+            <p>Restart requires completed reconciliation.</p>
+            <footer><span>authority: system</span><span>v4</span></footer>
+          </article>
 
-      <section className="panel proof-panel">
-        <div className="panel-heading">
-          <div><span className="eyebrow">ACTION PROOF</span><h2>Evidence behind this decision</h2></div>
-        </div>
-        <div className="proof-grid">
-          <div><span>Policy</span><strong>POL-RESTART-001</strong><small>Authority: system</small></div>
-          <div><span>Live state</span><strong>{fixture.reconciliation}</strong><small>Current incident state</small></div>
-          <div><span>Runbook</span><strong>RB-DISCONNECT-004</strong><small>Recovery sequence</small></div>
-          <div><span>Decision code</span><strong>{decisionCode}</strong><small>Policy result</small></div>
-        </div>
-      </section>
+          <article>
+            <div><span className="evidence-type">STATE</span><strong>INC-104</strong></div>
+            <p>reconciliation = {fixture.reconciliation}</p>
+            <footer><span>source: runtime</span><span>current</span></footer>
+          </article>
 
-      <section className="panel latency-panel">
-        <div className="panel-heading"><div><span className="eyebrow">LATENCY</span><h2>Preflight timing</h2></div></div>
-        <div className="metric-grid">
-          <div><span>Retrieval</span><strong>—</strong></div>
-          <div><span>Total preflight</span><strong>—</strong></div>
+          <article>
+            <div><span className="evidence-type">RUNBOOK</span><strong>RB-DISCONNECT-004</strong></div>
+            <p>Reconcile external state before service recovery.</p>
+            <footer><span>owner: ops</span><span>v2</span></footer>
+          </article>
         </div>
-        <p className="muted">Timing stays blank until it is measured from the real runtime.</p>
-      </section>
+      </aside>
 
-      <section className="panel timeline-panel">
-        <div className="panel-heading">
-          <div><span className="eyebrow">INCIDENT TIMELINE</span><h2>Decision path</h2></div>
-          <span className="live-dot">PREVIEW</span>
+      <section className="event-log">
+        <div className="section-title">
+          <span>EVENT LOG</span>
+          <strong>trace AP-104</strong>
         </div>
-        <div className="timeline">
-          {timeline.map(([time, event]) => (
-            <div className="timeline-row" key={time}>
-              <time>{time}</time><span className="timeline-node" /><p>{event}</p>
+        <div className="event-table">
+          {events.map(([time, type, detail]) => (
+            <div className="event-row" key={time}>
+              <time>{time}</time>
+              <code>{type}</code>
+              <span>{detail}</span>
             </div>
           ))}
         </div>
@@ -136,88 +185,101 @@ function MissionControl({ fixture }: { fixture: Fixture }) {
   )
 }
 
-function ScenarioLab() {
+function ScenarioView() {
   const scenarios = [
-    ['Safe Restart', 'Connected · reconciled · healthy', 'ALLOW'],
-    ['Unsafe Restart', 'Disconnected · reconciliation incomplete', 'BLOCK'],
-    ['Missing Context', 'Required state unavailable', 'CONFIRM'],
-    ['Stale Context', 'Required state is too old to trust', 'BLOCK'],
-    ['Successful Recovery', 'Reconcile → verify → retry restart', 'ALLOW'],
+    ['safe-restart', 'Connected / reconciled / healthy', 'ALLOW'],
+    ['unsafe-restart', 'Disconnected / reconciliation incomplete', 'BLOCK'],
+    ['missing-context', 'Reconciliation state unavailable', 'CONFIRM'],
+    ['stale-state', 'Required state is outside freshness window', 'BLOCK'],
+    ['recovered-retry', 'Reconcile / verify / retry restart', 'ALLOW'],
   ]
 
   return (
-    <main className="page-stack">
-      <div className="page-intro">
-        <span className="eyebrow">SCENARIO LAB</span>
-        <h1>Repeatable incident scenarios</h1>
-        <p>These scenarios keep the demo reproducible while the runtime is connected underneath them.</p>
+    <main className="utility-page">
+      <div className="utility-head">
+        <div><span className="mono-label">SCENARIO LAB</span><h1>Repeatable incident cases</h1></div>
+        <p>Small deterministic cases used to exercise the same decision path without relying on live failures.</p>
       </div>
-      <section className="scenario-grid">
-        {scenarios.map(([name, state, expected]) => (
-          <article className="scenario-card" key={name}>
-            <span className="expected">Expected · {expected}</span>
-            <h2>{name}</h2><p>{state}</p>
-            <button disabled>Not wired yet</button>
-          </article>
+      <div className="scenario-table">
+        <div className="scenario-header"><span>ID</span><span>INITIAL STATE</span><span>EXPECTED</span><span /></div>
+        {scenarios.map(([id, state, expected]) => (
+          <div className="scenario-row" key={id}>
+            <code>{id}</code>
+            <span>{state}</span>
+            <strong className={`expected expected-${expected.toLowerCase()}`}>{expected}</strong>
+            <button disabled>not wired</button>
+          </div>
         ))}
-      </section>
+      </div>
     </main>
   )
 }
 
-function LatencyLab() {
+function LatencyView() {
   return (
-    <main className="page-stack">
-      <div className="page-intro">
-        <span className="eyebrow">LATENCY LAB</span>
-        <h1>Retrieval and preflight timing</h1>
-        <p>This view will report measured latency once the real retrieval and decision path is connected.</p>
+    <main className="utility-page">
+      <div className="utility-head">
+        <div><span className="mono-label">LATENCY LAB</span><h1>Preflight timing</h1></div>
+        <p>Numbers remain empty until the real retrieval and decision path is measured end-to-end.</p>
       </div>
-      <section className="panel empty-lab">
-        <div className="metric-grid wide">
-          <div><span>p50</span><strong>—</strong></div>
-          <div><span>p95</span><strong>—</strong></div>
-          <div><span>p99</span><strong>—</strong></div>
-          <div><span>max</span><strong>—</strong></div>
-        </div>
-        <div className="empty-chart"><span>No benchmark run yet.</span></div>
-      </section>
+
+      <div className="latency-summary">
+        {['p50', 'p95', 'p99', 'max'].map((label) => (
+          <div key={label}><span>{label}</span><strong>—</strong><small>no run</small></div>
+        ))}
+      </div>
+
+      <div className="chart-shell">
+        <div className="chart-grid" />
+        <span>benchmark data will render here</span>
+      </div>
     </main>
   )
 }
 
 export default function App() {
-  const [page, setPage] = useState<Page>('Mission Control')
+  const [page, setPage] = useState<Page>('Mission')
   const [decision, setDecision] = useState<Decision>('BLOCK')
   const fixture = useMemo(() => fixtures[decision], [decision])
 
   return (
-    <div className="app-shell">
-      <header className="topbar">
+    <div className="app">
+      <header className="app-header">
         <div className="brand">
-          <span className="brand-mark">AP</span>
-          <div><strong>ActionProof</strong><small>Context proof before consequential action</small></div>
+          <span className="wordmark">ACTIONPROOF</span>
+          <span className="product-note">runtime control for agent actions</span>
         </div>
-        <div className="phase-badge">LOCAL PROTOTYPE</div>
+
+        <div className="header-meta">
+          <span>demo / local</span>
+          <span className="health-dot">api pending</span>
+        </div>
       </header>
 
-      <nav className="nav-bar">
-        <div className="nav-tabs">
-          {(['Mission Control', 'Scenario Lab', 'Latency Lab'] as Page[]).map((item) => (
-            <button key={item} className={page === item ? 'active' : ''} onClick={() => setPage(item)}>{item}</button>
-          ))}
-        </div>
-        <div className="preview-controls" aria-label="Preview decision states">
-          <span>Preview</span>
-          {(['ALLOW', 'CONFIRM', 'BLOCK'] as Decision[]).map((item) => (
-            <button key={item} className={`preview-${item.toLowerCase()} ${decision === item ? 'selected' : ''}`} onClick={() => setDecision(item)}>{item}</button>
-          ))}
-        </div>
-      </nav>
+      <div className="control-bar">
+        <nav>
+          <button className={page === 'Mission' ? 'active' : ''} onClick={() => setPage('Mission')}>Mission</button>
+          <button className={page === 'Scenarios' ? 'active' : ''} onClick={() => setPage('Scenarios')}>Scenarios</button>
+          <button className={page === 'Latency' ? 'active' : ''} onClick={() => setPage('Latency')}>Latency</button>
+        </nav>
 
-      {page === 'Mission Control' && <MissionControl fixture={fixture} />}
-      {page === 'Scenario Lab' && <ScenarioLab />}
-      {page === 'Latency Lab' && <LatencyLab />}
+        <div className="state-switch">
+          <span>preview state</span>
+          {(['ALLOW', 'CONFIRM', 'BLOCK'] as Decision[]).map((item) => (
+            <button
+              key={item}
+              className={decision === item ? `selected ${item.toLowerCase()}` : ''}
+              onClick={() => setDecision(item)}
+            >
+              {item.toLowerCase()}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {page === 'Mission' && <MissionView fixture={fixture} />}
+      {page === 'Scenarios' && <ScenarioView />}
+      {page === 'Latency' && <LatencyView />}
     </div>
   )
 }
