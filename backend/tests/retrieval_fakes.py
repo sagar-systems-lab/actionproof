@@ -84,3 +84,47 @@ class FakeMossBackend:
         if source_type in (SourceType.RUNBOOK, SourceType.HISTORY):
             return "ops"
         return "runtime"
+
+
+from app.models.state import SimulatorState
+
+
+class StatefulFakeMossBackend(FakeMossBackend):
+    def __init__(self, *, state: SimulatorState, environment: str = "production") -> None:
+        super().__init__(environment=environment)
+        self.state = state
+        self.updates: list[SimulatorState] = []
+
+    async def query(
+        self,
+        requirement: ContextRequirement,
+        *,
+        incident_id: str,
+    ) -> list[RawRetrievedDocument]:
+        documents = await super().query(
+            requirement,
+            incident_id=incident_id,
+        )
+        for document in documents:
+            if document.metadata.get("source_type") == SourceType.LIVE_STATE.value:
+                document.metadata.update(
+                    {
+                        "connection": self.state.connection.value,
+                        "reconciliation": self.state.reconciliation.value,
+                        "service": self.state.service.value,
+                        "health": self.state.health.value,
+                        "outstanding": self.state.outstanding.value,
+                    }
+                )
+        return documents
+
+    async def upsert_live_state(
+        self,
+        incident_id: str,
+        state: SimulatorState,
+        *,
+        version: str = "1",
+        ttl_seconds: int = 30,
+    ) -> None:
+        self.state = state
+        self.updates.append(state)
