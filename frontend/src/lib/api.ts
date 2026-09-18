@@ -110,11 +110,12 @@ export function subscribeRuntimeEvents(
   }
 }
 
-export function runBenchmark(
+
+export function startBenchmark(
   iterations: 100 | 500 | 1000,
   scenario: import('../types').BenchmarkScenario,
-): Promise<import('../types').BenchmarkRun> {
-  return requestJson('/api/benchmarks/run', {
+): Promise<import('../types').BenchmarkJob> {
+  return requestJson('/api/benchmarks/start', {
     method: 'POST',
     body: JSON.stringify({
       iterations,
@@ -122,4 +123,8 @@ export function runBenchmark(
       warmup: 10,
     }),
   })
+}
+
+export function getCurrentBenchmark(): Promise<import('../types').BenchmarkJob> {
+  return requestJson('/api/benchmarks/current')
 }

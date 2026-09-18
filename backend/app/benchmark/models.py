@@ -73,3 +73,17 @@ class BenchmarkRun(BaseModel):
     percentile_method: str
     metrics: BenchmarkMetrics
     result_file: str
+
+class BenchmarkJob(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    job_id: str
+    state: str
+    scenario: BenchmarkScenario
+    iterations: int
+    warmup: int
+    completed_iterations: int = 0
+    completed_warmup: int = 0
+    elapsed_seconds: float = 0.0
+    message: str = "Preparing benchmark."
+    result: BenchmarkRun | None = None

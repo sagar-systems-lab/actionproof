@@ -160,3 +160,16 @@ export type BenchmarkRun = {
   metrics: BenchmarkMetrics
   result_file: string
 }
+
+export type BenchmarkJob = {
+  job_id: string
+  state: 'running' | 'completed' | 'failed'
+  scenario: BenchmarkScenario
+  iterations: number
+  warmup: number
+  completed_iterations: number
+  completed_warmup: number
+  elapsed_seconds: number
+  message: string
+  result: BenchmarkRun | null
+}

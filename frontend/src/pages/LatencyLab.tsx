@@ -1,11 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type {
+  BenchmarkJob,
   BenchmarkRun,
   BenchmarkScenario,
   EvaluationResult,
   ProductScenarioResult,
 } from '../types'
-import { runBenchmark } from '../lib/api'
+import { getCurrentBenchmark, startBenchmark } from '../lib/api'
 import { formatMicros } from '../components/LatencyCard'
 
 type Props = {
@@ -49,21 +50,53 @@ export default function LatencyLab({ result, showingFinal }: Props) {
 
   const [iterations, setIterations] = useState<100 | 500 | 1000>(100)
   const [scenario, setScenario] = useState<BenchmarkScenario>('mixed')
-  const [benchmark, setBenchmark] = useState<BenchmarkRun | null>(null)
-  const [running, setRunning] = useState(false)
+  const [job, setJob] = useState<BenchmarkJob | null>(null)
   const [error, setError] = useState<string | null>(null)
 
+  const running = job?.state === 'running'
+  const benchmark = job?.result || null
+
+  useEffect(() => {
+    let alive = true
+    getCurrentBenchmark()
+      .then((current) => {
+        if (alive) setJob(current)
+      })
+      .catch(() => undefined)
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!running) return undefined
+
+    const timer = window.setInterval(() => {
+      getCurrentBenchmark()
+        .then((current) => {
+          setJob(current)
+          if (current.state === 'failed') {
+            setError(current.message)
+          }
+        })
+        .catch(() => setError('Benchmark status could not be refreshed.'))
+    }, 500)
+
+    return () => window.clearInterval(timer)
+  }, [running])
+
   async function run() {
-    setRunning(true)
     setError(null)
     try {
-      setBenchmark(await runBenchmark(iterations, scenario))
+      setJob(await startBenchmark(iterations, scenario))
     } catch {
-      setError('Benchmark could not complete cleanly. Check runtime health and try again.')
-    } finally {
-      setRunning(false)
+      setError('Benchmark could not start. Check runtime health and try again.')
     }
   }
+
+  const measured = job?.completed_iterations || 0
+  const total = job?.iterations || iterations
+  const progress = total ? Math.min(100, (measured / total) * 100) : 0
 
   return (
     <main className="workspace utility-view">
@@ -137,6 +170,23 @@ export default function LatencyLab({ result, showingFinal }: Props) {
             </div>
           </div>
 
+          {running && job && (
+            <div className="benchmark-progress">
+              <div className="benchmark-progress-head">
+                <strong>{job.message}</strong>
+                <span>{job.elapsed_seconds.toFixed(1)} s elapsed</span>
+              </div>
+              <div className="benchmark-progress-track">
+                <div style={{ width: progress + '%' }} />
+              </div>
+              <div className="benchmark-progress-meta">
+                <span>{job.completed_warmup}/{job.warmup} warmup</span>
+                <span>{measured}/{total} measured</span>
+                <span>You can leave this tab; the run continues on the server.</span>
+              </div>
+            </div>
+          )}
+
           {error && <div className="benchmark-error">{error}</div>}
 
           {benchmark ? (
@@ -159,10 +209,11 @@ export default function LatencyLab({ result, showingFinal }: Props) {
                 <span>{benchmark.warmup} warmup</span>
                 <span>{benchmark.scenario} workload</span>
                 <span>{(benchmark.error_rate * 100).toFixed(2)}% errors</span>
+                <span>{job?.elapsed_seconds.toFixed(1)} s wall time</span>
                 <code>{benchmark.revision.slice(0, 12)}</code>
               </div>
             </>
-          ) : (
+          ) : !running && (
             <div className="benchmark-empty">
               <strong>No distribution measured yet</strong>
               <span>Start with 100 mixed runs. Larger runs are available after the first baseline.</span>

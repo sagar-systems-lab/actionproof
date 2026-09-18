@@ -959,3 +959,45 @@ code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
     padding: 0 6px;
   }
 }
+
+.benchmark-progress {
+  margin: 16px 20px 8px;
+  padding: 14px;
+  border: 1px solid #d9e2ed;
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.benchmark-progress-head,
+.benchmark-progress-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.benchmark-progress-head strong {
+  color: #26394f;
+  font-size: 11px;
+}
+
+.benchmark-progress-head span,
+.benchmark-progress-meta span {
+  color: #718092;
+  font-size: 9px;
+}
+
+.benchmark-progress-track {
+  height: 6px;
+  margin: 10px 0;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e9eef5;
+}
+
+.benchmark-progress-track > div {
+  height: 100%;
+  border-radius: inherit;
+  background: #2d67d8;
+  transition: width .25s ease;
+}

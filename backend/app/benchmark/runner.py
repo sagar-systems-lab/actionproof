@@ -7,6 +7,7 @@ import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
+from typing import Callable
 
 from app.models.action import ActionIntent
 from app.models.decision import DecisionCode
@@ -47,17 +48,25 @@ class BenchmarkRunner:
         )
         self.root = root
 
-    async def run(self, request: BenchmarkRequest) -> BenchmarkRun:
+    async def run(
+        self,
+        request: BenchmarkRequest,
+        progress: Callable[[str, int, int], None] | None = None,
+    ) -> BenchmarkRun:
         await self._prepare_states()
 
         for index in range(request.warmup):
             lane = self._lane(request.scenario, index)
             await self._evaluate(lane, iteration=-(index + 1))
+            if progress is not None:
+                progress("warmup", index + 1, request.warmup)
 
         samples: list[BenchmarkSample] = []
         for index in range(request.iterations):
             lane = self._lane(request.scenario, index)
             samples.append(await self._sample(lane, index + 1))
+            if progress is not None:
+                progress("measure", index + 1, request.iterations)
 
         errors = sum(sample.error is not None for sample in samples)
         valid = [sample for sample in samples if sample.error is None]
