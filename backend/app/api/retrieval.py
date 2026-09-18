@@ -1,24 +1,33 @@
 from __future__ import annotations
 
-import os
-
 from fastapi import APIRouter
+
+from app.core.config import MossConfigurationError, MossSettings
 
 router = APIRouter(prefix="/api/retrieval", tags=["retrieval"])
 
 
 @router.get("/status")
 def retrieval_status() -> dict[str, object]:
-    configured = bool(
-        os.getenv("MOSS_PROJECT_ID", "").strip()
-        and os.getenv("MOSS_PROJECT_KEY", "").strip()
-    )
+    try:
+        settings = MossSettings.from_env()
+    except MossConfigurationError:
+        return {
+            "configured": False,
+            "environment": "production",
+            "indexes": {
+                "policy": "actionproof-policy",
+                "knowledge": "actionproof-knowledge",
+                "live_state": "actionproof-live-state",
+            },
+        }
+
     return {
-        "configured": configured,
-        "environment": os.getenv("ACTIONPROOF_ENV", "production"),
+        "configured": True,
+        "environment": settings.environment,
         "indexes": {
-            "policy": os.getenv("MOSS_POLICY_INDEX", "actionproof-policy"),
-            "knowledge": os.getenv("MOSS_KNOWLEDGE_INDEX", "actionproof-knowledge"),
-            "live_state": os.getenv("MOSS_LIVE_STATE_INDEX", "actionproof-live-state"),
+            "policy": settings.policy_index,
+            "knowledge": settings.knowledge_index,
+            "live_state": settings.live_state_index,
         },
     }
