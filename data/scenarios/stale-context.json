@@ -1,0 +1,30 @@
+{
+  "scenario_id": "stale-context",
+  "title": "Required state is stale",
+  "request": {
+    "intent": {
+      "action_id": "ACT-STALE-001",
+      "trace_id": "TRACE-STALE-001",
+      "actor": "operations-agent",
+      "text": "Restart the service.",
+      "incident_id": "INC-STALE-001",
+      "timestamp": "2026-09-18T08:15:00Z"
+    },
+    "context": {
+      "state": {
+        "connection": "CONNECTED",
+        "reconciliation": "COMPLETE",
+        "service": "RUNNING",
+        "health": "HEALTHY",
+        "outstanding": "CLEAR"
+      },
+      "required_context_complete": true,
+      "freshness": "STALE",
+      "policy_available": true
+    }
+  },
+  "expected": {
+    "decision": "BLOCK",
+    "code": "BLOCK_CONTEXT_STALE"
+  }
+}
