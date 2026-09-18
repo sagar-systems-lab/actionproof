@@ -57,3 +57,35 @@ class HeroScenarioResult(BaseModel):
     retry_restart: EvaluationResult
     final_state: SimulatorState
     events: tuple[RuntimeEvent, ...]
+
+
+class ScenarioId(str, Enum):
+    SAFE_RESTART = "safe-restart"
+    UNSAFE_RESTART = "unsafe-restart"
+    MISSING_CONTEXT = "missing-context"
+    STALE_CONTEXT = "stale-context"
+    SUCCESSFUL_RECOVERY = "successful-recovery"
+
+
+class ScenarioDefinition(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    id: ScenarioId
+    label: str
+    description: str
+    expected: str
+
+
+class ProductScenarioResult(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    scenario_id: ScenarioId
+    label: str
+    description: str
+    incident_id: str
+    initial_state: SimulatorState | None
+    primary_evaluation: EvaluationResult
+    recovery: ExecutedActionResult | None = None
+    final_evaluation: EvaluationResult | None = None
+    final_state: SimulatorState | None = None
+    events: tuple[RuntimeEvent, ...]

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
+from app.models.state import SimulatorState
 from app.retrieval.schemas import (
     ContextRequirement,
     RawRetrievedDocument,
@@ -86,13 +87,14 @@ class FakeMossBackend:
         return "runtime"
 
 
-from app.models.state import SimulatorState
-
-
 class StatefulFakeMossBackend(FakeMossBackend):
     def __init__(self, *, state: SimulatorState, environment: str = "production") -> None:
         super().__init__(environment=environment)
+        now = datetime.now(timezone.utc)
         self.state = state
+        self.states: dict[str, SimulatorState] = {"INC-104": state}
+        self.state_updated_at: dict[str, datetime] = {"INC-104": now}
+        self.state_ttl: dict[str, int] = {"INC-104": 300}
         self.updates: list[SimulatorState] = []
 
     async def query(
@@ -101,19 +103,31 @@ class StatefulFakeMossBackend(FakeMossBackend):
         *,
         incident_id: str,
     ) -> list[RawRetrievedDocument]:
+        if (
+            requirement.source_types
+            and requirement.source_types[0] is SourceType.LIVE_STATE
+            and incident_id not in self.states
+        ):
+            self.queries.append(requirement.key)
+            return []
+
         documents = await super().query(
             requirement,
             incident_id=incident_id,
         )
         for document in documents:
             if document.metadata.get("source_type") == SourceType.LIVE_STATE.value:
+                state = self.states[incident_id]
                 document.metadata.update(
                     {
-                        "connection": self.state.connection.value,
-                        "reconciliation": self.state.reconciliation.value,
-                        "service": self.state.service.value,
-                        "health": self.state.health.value,
-                        "outstanding": self.state.outstanding.value,
+                        "incident_id": incident_id,
+                        "updated_at": self.state_updated_at[incident_id].isoformat(),
+                        "ttl_seconds": str(self.state_ttl[incident_id]),
+                        "connection": state.connection.value,
+                        "reconciliation": state.reconciliation.value,
+                        "service": state.service.value,
+                        "health": state.health.value,
+                        "outstanding": state.outstanding.value,
                     }
                 )
         return documents
@@ -127,4 +141,7 @@ class StatefulFakeMossBackend(FakeMossBackend):
         ttl_seconds: int = 30,
     ) -> None:
         self.state = state
+        self.states[incident_id] = state
+        self.state_updated_at[incident_id] = datetime.now(timezone.utc)
+        self.state_ttl[incident_id] = ttl_seconds
         self.updates.append(state)

@@ -7,6 +7,7 @@ from typing import Iterable
 
 from moss import (
     DocumentInfo,
+    GetDocumentsOptions,
     MossClient as MossSdkClient,
     MutationOptions,
     QueryOptions,
@@ -33,7 +34,6 @@ class MossClient:
         await asyncio.gather(
             self._ensure_loaded(self.settings.policy_index),
             self._ensure_loaded(self.settings.knowledge_index),
-            self._ensure_loaded(self.settings.live_state_index),
         )
 
     async def query(
@@ -42,6 +42,15 @@ class MossClient:
         *,
         incident_id: str,
     ) -> list[RawRetrievedDocument]:
+        if (
+            requirement.domain is RetrievalDomain.LIVE_STATE
+            and requirement.incident_scoped
+        ):
+            return await self._get_live_state(
+                requirement=requirement,
+                incident_id=incident_id,
+            )
+
         index_name = self._index_name(requirement.domain)
         await self._ensure_loaded(index_name)
 
@@ -101,6 +110,35 @@ class MossClient:
                 metadata=dict(doc.metadata or {}),
             )
             for doc in result.docs
+        ]
+
+    async def _get_live_state(
+        self,
+        *,
+        requirement: ContextRequirement,
+        incident_id: str,
+    ) -> list[RawRetrievedDocument]:
+        document_id = f"STATE-{incident_id}"
+        try:
+            docs = await self._client.get_docs(
+                self.settings.live_state_index,
+                GetDocumentsOptions(doc_ids=[document_id]),
+            )
+        except Exception as exc:
+            raise MossUnavailableError(
+                f"Moss live-state read failed for {requirement.key}: {exc}"
+            ) from exc
+
+        return [
+            RawRetrievedDocument(
+                document_id=doc.id,
+                index_name=self.settings.live_state_index,
+                content=doc.text,
+                score=1.0,
+                metadata=dict(doc.metadata or {}),
+            )
+            for doc in docs
+            if doc.id == document_id
         ]
 
     async def ensure_index(
@@ -168,7 +206,6 @@ class MossClient:
             MutationOptions(upsert=True),
         )
         await self._wait_for_job(mutation.job_id)
-        await self._reload(self.settings.live_state_index)
 
     async def _ensure_loaded(self, index_name: str) -> None:
         if index_name in self._loaded:
@@ -188,17 +225,6 @@ class MossClient:
                     f"failed to load Moss index '{index_name}': {exc}"
                 ) from exc
             self._loaded.add(index_name)
-
-    async def _reload(self, index_name: str) -> None:
-        try:
-            if index_name in self._loaded:
-                await self._client.unload_index(index_name)
-                self._loaded.remove(index_name)
-            await self._ensure_loaded(index_name)
-        except Exception as exc:
-            raise MossUnavailableError(
-                f"failed to refresh Moss index '{index_name}': {exc}"
-            ) from exc
 
     async def _wait_for_job(self, job_id: str, timeout_seconds: float = 60.0) -> None:
         deadline = monotonic() + timeout_seconds
