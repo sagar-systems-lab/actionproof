@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import asyncio
-import os
 from datetime import datetime, timezone
 
 import pytest
 
-from app.core.config import MossSettings
+from app.core.config import MossConfigurationError, MossSettings
 from app.models.action import ActionIntent
 from app.models.decision import DecisionCode
 from app.models.state import (
@@ -25,9 +24,10 @@ pytestmark = pytest.mark.moss_live
 
 
 def settings_or_skip() -> MossSettings:
-    if not os.getenv("MOSS_PROJECT_ID") or not os.getenv("MOSS_PROJECT_KEY"):
+    try:
+        return MossSettings.from_env()
+    except MossConfigurationError:
         pytest.skip("live Moss credentials are not configured")
-    return MossSettings.from_env()
 
 
 def test_live_moss_retrieval_and_dynamic_state_update() -> None:
