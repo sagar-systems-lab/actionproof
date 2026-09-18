@@ -73,9 +73,9 @@ export default function ScenarioLab({
       <section className="page-heading">
         <div>
           <div className="breadcrumb">ActionProof / Scenario Lab</div>
-          <h1>Five deterministic cases. One protected runtime.</h1>
+          <h1>Five cases. One protected decision path.</h1>
           <p>
-            Every run uses the same Moss retrieval, policy, proof, and runtime path shown in Mission Control.
+            Change the state, keep the control path constant. Every case runs through live Moss retrieval, policy, proof, and runtime verification.
           </p>
         </div>
       </section>

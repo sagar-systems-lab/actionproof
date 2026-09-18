@@ -1092,3 +1092,278 @@ code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
     gap: 6px;
   }
 }
+
+/* Interaction polish: restrained motion, stronger hierarchy, no decorative dependency. */
+body {
+  background:
+    radial-gradient(circle at 18% -8%, rgba(37, 99, 235, .055), transparent 30%),
+    radial-gradient(circle at 88% 4%, rgba(103, 80, 164, .035), transparent 24%),
+    var(--page);
+}
+
+.app {
+  position: relative;
+  isolation: isolate;
+}
+
+.page-motion {
+  animation: page-enter .42s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.workspace {
+  position: relative;
+}
+
+.workspace::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 18px;
+  right: 4%;
+  width: 320px;
+  height: 210px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(37, 99, 235, .055), rgba(37, 99, 235, 0) 68%);
+  filter: blur(6px);
+  pointer-events: none;
+  animation: ambient-drift 9s ease-in-out infinite alternate;
+}
+
+.page-heading .breadcrumb {
+  animation: copy-rise .38s .03s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.page-heading h1 {
+  text-wrap: balance;
+  animation: copy-rise .42s .07s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.page-heading p {
+  text-wrap: pretty;
+  animation: copy-rise .44s .11s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.nav-shell nav button {
+  position: relative;
+  border-bottom: 0;
+  transition: color .2s ease;
+}
+
+.nav-shell nav button::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--blue);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform .24s cubic-bezier(.22, 1, .36, 1);
+}
+
+.nav-shell nav button.active {
+  border-bottom-color: transparent;
+}
+
+.nav-shell nav button.active::after {
+  transform: scaleX(1);
+}
+
+.runtime-indicator.online > span {
+  animation: status-breathe 2.6s ease-in-out infinite;
+}
+
+.button {
+  transition:
+    border-color .16s ease,
+    background .16s ease,
+    box-shadow .16s ease,
+    transform .16s cubic-bezier(.22, 1, .36, 1);
+}
+
+.button:not(:disabled):hover {
+  transform: translateY(-2px);
+}
+
+.button.primary:not(:disabled):hover,
+.button.hero-run:not(:disabled):hover {
+  box-shadow: 0 8px 18px rgba(37, 99, 235, .20);
+}
+
+.button:not(:disabled):active {
+  transform: translateY(0) scale(.985);
+}
+
+.card {
+  transition:
+    border-color .2s ease,
+    box-shadow .2s ease,
+    transform .2s cubic-bezier(.22, 1, .36, 1);
+}
+
+.mission-grid > .card,
+.scenario-table,
+.latency-lab-grid > .card {
+  animation: card-rise .48s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.mission-grid > .card:nth-child(2),
+.latency-lab-grid > .card:nth-child(2) {
+  animation-delay: .055s;
+}
+
+.mission-grid > .card:nth-child(3) {
+  animation-delay: .10s;
+}
+
+.mission-grid > .card:nth-child(4) {
+  animation-delay: .145s;
+}
+
+.mission-grid > .card:nth-child(5) {
+  animation-delay: .19s;
+}
+
+.scenario-line {
+  transition:
+    background .18s ease,
+    transform .18s cubic-bezier(.22, 1, .36, 1);
+}
+
+.scenario-line:hover {
+  background: #fbfdff;
+  transform: translateX(2px);
+}
+
+.decision-hero,
+.benchmark-panel {
+  box-shadow:
+    0 1px 2px rgba(16, 42, 67, .05),
+    0 16px 38px rgba(16, 42, 67, .065);
+}
+
+.decision-accent {
+  background-size: 180% 100%;
+  animation: accent-breathe 3.8s ease-in-out infinite alternate;
+}
+
+.brand-mark {
+  position: relative;
+  overflow: hidden;
+}
+
+.brand-mark::after {
+  content: "";
+  position: absolute;
+  inset: -45%;
+  background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,.16) 50%, transparent 62%);
+  transform: translateX(-70%) rotate(8deg);
+  animation: brand-sheen 6.5s ease-in-out infinite;
+}
+
+.benchmark-progress-track > div {
+  box-shadow: 0 0 10px rgba(45, 103, 216, .22);
+}
+
+.scenario-run-status,
+.benchmark-progress {
+  animation: status-enter .28s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.proof-drawer {
+  animation: drawer-in .26s cubic-bezier(.22, 1, .36, 1);
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes copy-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(.995);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes status-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ambient-drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(-24px, 18px, 0) scale(1.08); }
+}
+
+@keyframes status-breathe {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(70, 185, 106, 0); }
+  50% { box-shadow: 0 0 0 4px rgba(70, 185, 106, .10); }
+}
+
+@keyframes accent-breathe {
+  from { opacity: .84; }
+  to { opacity: 1; }
+}
+
+@keyframes brand-sheen {
+  0%, 70% { transform: translateX(-85%) rotate(8deg); opacity: 0; }
+  78% { opacity: 1; }
+  92%, 100% { transform: translateX(85%) rotate(8deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-motion,
+  .page-heading .breadcrumb,
+  .page-heading h1,
+  .page-heading p,
+  .mission-grid > .card,
+  .scenario-table,
+  .latency-lab-grid > .card,
+  .runtime-indicator.online > span,
+  .decision-accent,
+  .brand-mark::after,
+  .workspace::before,
+  .scenario-run-status,
+  .benchmark-progress {
+    animation: none !important;
+  }
+
+  .nav-shell nav button::after,
+  .card,
+  .button,
+  .scenario-line {
+    transition: none !important;
+  }
+}

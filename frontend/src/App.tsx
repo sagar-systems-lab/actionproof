@@ -143,6 +143,7 @@ export default function App() {
         </div>
       )}
 
+      <div className="page-motion" key={page}>
       {page === 'Mission' && (
         <MissionControl
           result={result}
@@ -173,6 +174,7 @@ export default function App() {
       {page === 'Latency' && (
         <LatencyLab result={result} showingFinal={showingFinal} />
       )}
+      </div>
 
       <ProofDrawer
         evaluation={activeEvaluation}

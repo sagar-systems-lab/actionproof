@@ -103,9 +103,9 @@ export default function LatencyLab({ result, showingFinal }: Props) {
       <section className="page-heading">
         <div>
           <div className="breadcrumb">ActionProof / Latency Lab</div>
-          <h1>Measured preflight performance</h1>
+          <h1>See exactly where preflight time goes.</h1>
           <p>
-            Run the real ActionProof decision path and inspect observed latency distributions. Setup writes are excluded from timed samples.
+            Measure the real ActionProof path from retrieval through proof assembly, with repeatable p50, p95, p99, and max latency.
           </p>
         </div>
       </section>

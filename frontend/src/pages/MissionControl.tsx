@@ -51,9 +51,9 @@ export default function MissionControl({
       <section className="page-heading mission-heading">
         <div>
           <div className="breadcrumb">ActionProof / Mission Control</div>
-          <h1>High-impact agent actions, with proof before execution.</h1>
+          <h1>Every high-impact agent action should carry its proof.</h1>
           <p>
-            Live Moss context, deterministic policy, protected execution, and postflight verification in one control surface.
+            ActionProof retrieves live Moss context, applies deterministic policy, and verifies what happened after execution.
           </p>
         </div>
         <button className="button hero-run" onClick={onRunHero} disabled={loading || !apiOnline}>
