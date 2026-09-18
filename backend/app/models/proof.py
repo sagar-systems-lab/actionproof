@@ -27,6 +27,14 @@ class EvidenceFact(BaseModel):
 class LatencyBreakdown(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
+    normalization_ns: int = 0
+    context_resolve_ns: int = 0
+    moss_retrieval_ns: int = 0
+    freshness_ns: int = 0
+    policy_eval_ns: int = 0
+    proof_build_ns: int = 0
+    total_preflight_ns: int = 0
+
     retrieval_us: int = 0
     freshness_us: int = 0
     policy_us: int = 0

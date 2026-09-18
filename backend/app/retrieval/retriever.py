@@ -54,9 +54,11 @@ class MossContextRetriever:
         self.validator = validator or EvidenceValidator()
 
     async def retrieve(self, action: NormalizedAction) -> RetrievalOutcome:
+        resolve_started = perf_counter_ns()
         requirements = self.resolver.resolve(action)
-        retrieval_started = perf_counter_ns()
+        context_resolve_ns = perf_counter_ns() - resolve_started
 
+        retrieval_started = perf_counter_ns()
         raw_results = await asyncio.gather(
             *[
                 self.client.query(
@@ -67,7 +69,7 @@ class MossContextRetriever:
             ],
             return_exceptions=True,
         )
-        retrieval_us = (perf_counter_ns() - retrieval_started) // 1_000
+        moss_retrieval_ns = perf_counter_ns() - retrieval_started
 
         validation_started = perf_counter_ns()
         evidence: list[RetrievedEvidence] = []
@@ -138,7 +140,7 @@ class MossContextRetriever:
             satisfied,
         )
 
-        freshness_us = (perf_counter_ns() - validation_started) // 1_000
+        freshness_ns = perf_counter_ns() - validation_started
 
         context = DecisionContext(
             state=state,
@@ -154,8 +156,11 @@ class MossContextRetriever:
             evidence=tuple(evidence),
             issues=tuple(issues),
             metrics=RetrievalMetrics(
-                retrieval_us=int(retrieval_us),
-                freshness_us=int(freshness_us),
+                context_resolve_ns=int(context_resolve_ns),
+                moss_retrieval_ns=int(moss_retrieval_ns),
+                freshness_ns=int(freshness_ns),
+                retrieval_us=int(moss_retrieval_ns // 1_000),
+                freshness_us=int(freshness_ns // 1_000),
             ),
         )
 
