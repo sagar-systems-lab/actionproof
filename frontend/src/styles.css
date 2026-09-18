@@ -500,3 +500,149 @@ button { font: inherit; }
   .scenario-row button { grid-column: 2; grid-row: 1; }
   .latency-summary { grid-template-columns: 1fr 1fr; }
 }
+
+/* Final typography pass: stronger hierarchy without decorative glow. */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.page-heading h1 {
+  font-size: 30px;
+  font-weight: 760;
+  color: #0f172a;
+  letter-spacing: -0.03em;
+}
+
+.page-heading p {
+  color: #556476;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.card-header h2 {
+  font-size: 17px;
+  font-weight: 720;
+  color: #162338;
+}
+
+.section-kicker {
+  color: #8090a3;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.context-copy strong,
+.tool-call code,
+.scenario-row code {
+  color: #183b63;
+}
+
+.context-copy p,
+.decision-top p,
+.decision-sections p,
+.evidence-list p,
+.event-row span,
+.scenario-row,
+.latency-summary small {
+  color: #526273;
+}
+
+.decision-top h2 {
+  font-size: 29px;
+  font-weight: 760;
+  color: #101827;
+  letter-spacing: -0.03em;
+}
+
+.tool-call code {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.next-action-box p {
+  font-size: 14px;
+  font-weight: 650;
+  color: #183a61;
+}
+
+.metric-strip strong {
+  font-size: 20px;
+  font-weight: 700;
+  color: #142033;
+}
+
+.metric-strip small {
+  color: #7b8898;
+  font-size: 10px;
+}
+
+.evidence-heading code,
+.event-header code,
+.decision-footer code {
+  color: #6b7a8c;
+  font-weight: 600;
+}
+
+.event-row {
+  font-size: 12px;
+}
+
+.event-row time {
+  color: #7a8795;
+}
+
+.event-row code {
+  color: #245fdb;
+  font-weight: 600;
+}
+
+.nav-shell nav button {
+  font-size: 14px;
+}
+
+.state-switch > span {
+  font-size: 11px;
+  color: #7b8796;
+}
+
+.state-switch button {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.scenario-header {
+  color: #7d8c9d;
+  font-size: 10px;
+}
+
+.expected {
+  font-size: 11px;
+}
+
+.latency-summary strong {
+  font-size: 24px;
+  font-weight: 720;
+}
+
+.empty-state strong {
+  font-size: 14px;
+  color: #162033;
+}
+
+.empty-state span {
+  font-size: 11px;
+  color: #5f6f80;
+}
+
+@media (max-width: 760px) {
+  .page-heading h1 {
+    font-size: 26px;
+  }
+
+  .decision-top h2 {
+    font-size: 25px;
+  }
+}
+
