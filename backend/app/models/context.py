@@ -18,3 +18,4 @@ class DecisionContext(BaseModel):
     required_context_complete: bool = True
     freshness: ContextFreshness = ContextFreshness.FRESH
     policy_available: bool = True
+    retrieval_failed: bool = False
