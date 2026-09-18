@@ -29,11 +29,14 @@ class MossClient:
         self._client = MossSdkClient(settings.project_id, settings.project_key)
         self._loaded: set[str] = set()
         self._load_lock = asyncio.Lock()
+        self._live_session = None
+        self._live_session_lock = asyncio.Lock()
 
     async def start(self) -> None:
         await asyncio.gather(
             self._ensure_loaded(self.settings.policy_index),
             self._ensure_loaded(self.settings.knowledge_index),
+            self._ensure_live_session(),
         )
 
     async def query(
@@ -120,10 +123,8 @@ class MossClient:
     ) -> list[RawRetrievedDocument]:
         document_id = f"STATE-{incident_id}"
         try:
-            docs = await self._client.get_docs(
-                self.settings.live_state_index,
-                GetDocumentsOptions(doc_ids=[document_id]),
-            )
+            session = await self._ensure_live_session()
+            docs = await session.get_docs()
         except Exception as exc:
             raise MossUnavailableError(
                 f"Moss live-state read failed for {requirement.key}: {exc}"
@@ -231,12 +232,30 @@ class MossClient:
             metadata=metadata,
         )
 
-        mutation = await self._client.add_docs(
-            self.settings.live_state_index,
-            [document],
-            MutationOptions(upsert=True),
-        )
-        await self._wait_for_job(mutation.job_id)
+        try:
+            session = await self._ensure_live_session()
+            await session.add_docs([document])
+        except Exception as exc:
+            raise MossUnavailableError(
+                f"Moss live-state update failed for '{incident_id}': {exc}"
+            ) from exc
+
+    async def _ensure_live_session(self):
+        if self._live_session is not None:
+            return self._live_session
+
+        async with self._live_session_lock:
+            if self._live_session is not None:
+                return self._live_session
+            try:
+                self._live_session = await self._client.session(
+                    index_name=self.settings.live_state_index,
+                )
+            except Exception as exc:
+                raise MossUnavailableError(
+                    f"failed to open Moss live-state session: {exc}"
+                ) from exc
+            return self._live_session
 
     async def _ensure_loaded(self, index_name: str) -> None:
         if index_name in self._loaded:
