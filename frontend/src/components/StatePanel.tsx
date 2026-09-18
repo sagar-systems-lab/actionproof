@@ -27,9 +27,9 @@ export default function StatePanel({ state, incidentId, apiOnline, mossConfigure
   return (
     <aside className="card state-panel">
       <div className="card-header">
-        <div>
+        <div className="state-heading-copy">
           <span className="section-kicker">SYSTEM STATUS</span>
-          <h2>{incidentId || 'No live incident'}</h2>
+          <h2 title={incidentId || undefined}>{incidentId || 'No live incident'}</h2>
         </div>
         <span className={apiOnline && mossConfigured ? 'health-chip live' : 'health-chip'}>
           <span className="health-dot" />

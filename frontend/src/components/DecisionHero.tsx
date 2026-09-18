@@ -11,15 +11,19 @@ type Props = {
   onViewProof: () => void
 }
 
-const titles = {
-  ALLOW: 'Action allowed',
-  CONFIRM: 'Confirmation required',
-  BLOCK: 'Action blocked',
-} as const
+function humanize(value?: string) {
+  if (!value) return ''
+  const text = value.replaceAll('_', ' ')
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}
 
-function operationLabel(operation?: string) {
-  if (!operation) return 'No live action yet'
-  return operation.replaceAll('_', ' ')
+function decisionTitle(evaluation: EvaluationResult | null) {
+  if (!evaluation) return 'No action evaluated'
+
+  const operation = humanize(evaluation.action.operation)
+  if (evaluation.decision.status === 'ALLOW') return `${operation} authorized`
+  if (evaluation.decision.status === 'BLOCK') return `${operation} blocked`
+  return `${operation} needs confirmation`
 }
 
 export default function DecisionHero({
@@ -40,7 +44,7 @@ export default function DecisionHero({
       <div className="decision-heading">
         <div>
           <span className="section-kicker">DECISION</span>
-          <h1>{loading ? 'Evaluating live context…' : status ? titles[status] : 'No action evaluated'}</h1>
+          <h1>{loading ? 'Evaluating live context…' : decisionTitle(evaluation)}</h1>
           <p>
             {evaluation
               ? evaluation.decision.reason
@@ -53,7 +57,7 @@ export default function DecisionHero({
       <div className="proposed-action">
         <div>
           <span className="section-kicker">PROPOSED ACTION</span>
-          <strong>{operationLabel(evaluation?.action.operation)}</strong>
+          <strong>{evaluation ? humanize(evaluation.action.operation) : 'No live action yet'}</strong>
         </div>
         {scenarioLabel && <span className="scenario-chip">{scenarioLabel}</span>}
       </div>
@@ -65,7 +69,13 @@ export default function DecisionHero({
         </div>
         <div className="next-action">
           <span className="section-kicker">SAFE NEXT ACTION</span>
-          <p>{evaluation?.decision.recommended_next_action?.replaceAll('_', ' ') || (status === 'ALLOW' ? 'Proceed through protected execution.' : 'Run a scenario to establish the next action.')}</p>
+          <p>
+            {evaluation?.decision.recommended_next_action
+              ? humanize(evaluation.decision.recommended_next_action)
+              : status === 'ALLOW'
+                ? 'Proceed through protected execution.'
+                : 'Run a scenario to establish the next action.'}
+          </p>
         </div>
       </div>
 

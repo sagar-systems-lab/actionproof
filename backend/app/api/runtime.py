@@ -42,6 +42,22 @@ def get_closed_loop_runtime() -> ClosedLoopRuntime:
     return _runtime
 
 
+async def warm_closed_loop_runtime() -> None:
+    global _runtime
+
+    try:
+        settings = MossSettings.from_env()
+    except MossConfigurationError:
+        return
+
+    if _runtime is None:
+        _runtime = build_closed_loop_runtime(settings)
+
+    starter = getattr(_runtime.publisher, "start", None)
+    if starter is not None:
+        await starter()
+
+
 @router.get("/scenarios", response_model=list[ScenarioDefinition])
 def scenario_catalog() -> list[ScenarioDefinition]:
     return list(SCENARIOS)

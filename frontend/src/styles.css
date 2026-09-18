@@ -754,3 +754,13 @@ code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
 @media (prefers-reduced-motion: reduce) {
   * { scroll-behavior: auto !important; animation-duration: .001ms !important; }
 }
+
+.state-heading-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.state-heading-copy h2 {
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+}

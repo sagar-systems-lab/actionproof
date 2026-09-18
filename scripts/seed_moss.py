@@ -61,7 +61,7 @@ async def main() -> None:
         await client.ensure_index(index_name, documents)
 
     await client.start()
-    print("Moss indexes seeded and loaded.")
+    print("Moss indexes seeded; semantic indexes preloaded.")
 
 
 if __name__ == "__main__":

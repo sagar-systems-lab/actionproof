@@ -1,12 +1,23 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import actions_router, retrieval_router, runtime_router
+from app.api.runtime import warm_closed_loop_runtime
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    await warm_closed_loop_runtime()
+    yield
+
 
 app = FastAPI(
     title="ActionProof API",
     version="0.5.0",
     description="Runtime API for the ActionProof prototype.",
+    lifespan=lifespan,
 )
 
 app.add_middleware(

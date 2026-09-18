@@ -62,7 +62,10 @@ class PolicyEngine:
                     reason="Restart is not allowed until reconciliation is complete.",
                     recommended_next_action="run_reconciliation",
                 )
-            return self._allow()
+            return self._allow(
+                matched_rule="restart_requires_completed_reconciliation",
+                reason="Restart is authorized because reconciliation is complete.",
+            )
 
         if action.operation is Operation.RECOVER_CONNECTION:
             if state.reconciliation is not ReconciliationState.COMPLETE:
@@ -73,7 +76,10 @@ class PolicyEngine:
                     reason="Connection recovery is not allowed until reconciliation is complete.",
                     recommended_next_action="run_reconciliation",
                 )
-            return self._allow()
+            return self._allow(
+                matched_rule="connection_recovery_requires_completed_reconciliation",
+                reason="Connection recovery is authorized because reconciliation is complete.",
+            )
 
         if action.operation is Operation.RESUME:
             if (
@@ -88,10 +94,16 @@ class PolicyEngine:
                     reason="Resume requires connected, reconciled, healthy state.",
                     recommended_next_action="recover_service_state",
                 )
-            return self._allow()
+            return self._allow(
+                matched_rule="resume_requires_connected_reconciled_healthy_state",
+                reason="Resume is authorized because connection, reconciliation, and health requirements are satisfied.",
+            )
 
         if action.operation is Operation.RECONCILE:
-            return self._allow()
+            return self._allow(
+                matched_rule="reconciliation_is_safe_recovery_action",
+                reason="Reconciliation is authorized as the safe recovery action.",
+            )
 
         return PolicyDecision(
             status=DecisionStatus.BLOCK,
@@ -101,10 +113,10 @@ class PolicyEngine:
         )
 
     @staticmethod
-    def _allow() -> PolicyDecision:
+    def _allow(*, matched_rule: str, reason: str) -> PolicyDecision:
         return PolicyDecision(
             status=DecisionStatus.ALLOW,
             code=DecisionCode.ALLOW_SAFE_STATE,
-            matched_rule="required_state_is_safe",
-            reason="Required context is complete, current, and policy conditions are satisfied.",
+            matched_rule=matched_rule,
+            reason=reason,
         )
