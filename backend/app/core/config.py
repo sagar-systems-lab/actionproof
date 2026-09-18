@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+from pathlib import Path
+
+from dotenv import load_dotenv
 
 
 class MossConfigurationError(RuntimeError):
@@ -20,6 +23,9 @@ class MossSettings:
 
     @classmethod
     def from_env(cls) -> "MossSettings":
+        repo_env = Path(__file__).resolve().parents[3] / ".env"
+        load_dotenv(repo_env, override=False)
+
         project_id = os.getenv("MOSS_PROJECT_ID", "").strip()
         project_key = os.getenv("MOSS_PROJECT_KEY", "").strip()
 
