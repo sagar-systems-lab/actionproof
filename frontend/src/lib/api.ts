@@ -109,3 +109,17 @@ export function subscribeRuntimeEvents(
     source.close()
   }
 }
+
+export function runBenchmark(
+  iterations: 100 | 500 | 1000,
+  scenario: import('../types').BenchmarkScenario,
+): Promise<import('../types').BenchmarkRun> {
+  return requestJson('/api/benchmarks/run', {
+    method: 'POST',
+    body: JSON.stringify({
+      iterations,
+      scenario,
+      warmup: 10,
+    }),
+  })
+}

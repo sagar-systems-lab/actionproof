@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import actions_router, retrieval_router, runtime_router
+from app.api import actions_router, benchmark_router, retrieval_router, runtime_router
 from app.api.runtime import warm_closed_loop_runtime
 
 
@@ -15,7 +15,7 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(
     title="ActionProof API",
-    version="0.5.0",
+    version="0.6.0",
     description="Runtime API for the ActionProof prototype.",
     lifespan=lifespan,
 )
@@ -31,6 +31,7 @@ app.add_middleware(
 app.include_router(actions_router)
 app.include_router(retrieval_router)
 app.include_router(runtime_router)
+app.include_router(benchmark_router)
 
 
 @app.get("/api/health")
