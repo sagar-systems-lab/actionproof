@@ -20,6 +20,7 @@ class MossSettings:
     live_state_index: str = "actionproof-live-state"
     environment: str = "production"
     model_id: str = "moss-minilm"
+    runtime_mode: str = "local"
 
     @classmethod
     def from_env(cls) -> "MossSettings":
@@ -34,6 +35,12 @@ class MossSettings:
                 "MOSS_PROJECT_ID and MOSS_PROJECT_KEY are required for retrieval."
             )
 
+        runtime_mode = os.getenv("MOSS_RUNTIME_MODE", "local").strip().lower()
+        if runtime_mode not in {"local", "cloud"}:
+            raise MossConfigurationError(
+                "MOSS_RUNTIME_MODE must be 'local' or 'cloud'."
+            )
+
         return cls(
             project_id=project_id,
             project_key=project_key,
@@ -46,4 +53,5 @@ class MossSettings:
             ).strip(),
             environment=os.getenv("ACTIONPROOF_ENV", "production").strip(),
             model_id=os.getenv("MOSS_MODEL_ID", "moss-minilm").strip(),
+            runtime_mode=runtime_mode,
         )
