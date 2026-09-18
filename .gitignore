@@ -1,0 +1,17 @@
+# Repository bootstrap. Phase 1 implementation lives on phase/01-foundation until review.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+node_modules/
+frontend/dist/
+.env
+.env.*
+!.env.example
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+benchmarks/results/*.json
+coverage/
