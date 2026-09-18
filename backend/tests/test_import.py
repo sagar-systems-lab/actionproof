@@ -10,5 +10,7 @@ def test_backend_imports() -> None:
 def test_health_route() -> None:
     response = TestClient(app).get("/api/health")
     assert response.status_code == 200
-    assert response.json()["status"] == "healthy"
-    assert response.json()["phase"] == "01-foundation"
+    assert response.json() == {
+        "status": "healthy",
+        "runtime": "prototype",
+    }
