@@ -141,6 +141,37 @@ class MossClient:
             if doc.id == document_id
         ]
 
+    async def get_by_ids(
+        self,
+        index_name: str,
+        document_ids: Iterable[str],
+    ) -> list[RawRetrievedDocument]:
+        ids = tuple(document_ids)
+        if not ids:
+            return []
+
+        try:
+            docs = await self._client.get_docs(
+                index_name,
+                GetDocumentsOptions(doc_ids=list(ids)),
+            )
+        except Exception as exc:
+            raise MossUnavailableError(
+                f"Moss document lookup failed for '{index_name}': {exc}"
+            ) from exc
+
+        return [
+            RawRetrievedDocument(
+                document_id=doc.id,
+                index_name=index_name,
+                content=doc.text,
+                score=1.0,
+                metadata=dict(doc.metadata or {}),
+            )
+            for doc in docs
+            if doc.id in ids
+        ]
+
     async def ensure_index(
         self,
         name: str,
