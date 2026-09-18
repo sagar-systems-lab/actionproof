@@ -6,6 +6,15 @@ from app.models.state import ConnectionState, HealthState, ReconciliationState
 
 class PolicyEngine:
     def evaluate(self, action: NormalizedAction, context: DecisionContext) -> PolicyDecision:
+        if action.impact is RiskLevel.HIGH and context.retrieval_failed:
+            return PolicyDecision(
+                status=DecisionStatus.BLOCK,
+                code=DecisionCode.BLOCK_RETRIEVAL_FAILURE,
+                matched_rule="retrieval_must_succeed_for_high_impact_action",
+                reason="Required context could not be retrieved.",
+                recommended_next_action="restore_context_retrieval",
+            )
+
         if action.impact is RiskLevel.HIGH and not context.policy_available:
             return PolicyDecision(
                 status=DecisionStatus.BLOCK,

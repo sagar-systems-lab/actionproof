@@ -1,0 +1,68 @@
+[
+  {
+    "id": "RB-DISCONNECT-004",
+    "text": "Connection loss recovery: freeze new actions, reconcile outstanding external state, verify canonical state, recover the session, then resume.",
+    "metadata": {
+      "source_type": "runbook",
+      "authority": "ops",
+      "version": "4",
+      "environment": "production",
+      "updated_at": "$NOW",
+      "ttl_seconds": "31536000",
+      "risk_domain": "service_recovery"
+    }
+  },
+  {
+    "id": "RB-RECON-002",
+    "text": "Reconciliation procedure: read external state, compare local and external state, resolve differences, mark reconciliation complete, then verify outstanding state is clear.",
+    "metadata": {
+      "source_type": "runbook",
+      "authority": "ops",
+      "version": "2",
+      "environment": "production",
+      "updated_at": "$NOW",
+      "ttl_seconds": "31536000",
+      "risk_domain": "reconciliation"
+    }
+  },
+  {
+    "id": "RB-SERVICE-003",
+    "text": "Service recovery: verify current state, satisfy recovery policy, restart only when authorized, then verify service health.",
+    "metadata": {
+      "source_type": "runbook",
+      "authority": "ops",
+      "version": "3",
+      "environment": "production",
+      "updated_at": "$NOW",
+      "ttl_seconds": "31536000",
+      "risk_domain": "service_recovery"
+    }
+  },
+  {
+    "id": "RB-RESUME-002",
+    "text": "Resume workflow: require connected session, complete reconciliation, healthy service, and clear outstanding state before resuming operations.",
+    "metadata": {
+      "source_type": "runbook",
+      "authority": "ops",
+      "version": "2",
+      "environment": "production",
+      "updated_at": "$NOW",
+      "ttl_seconds": "31536000",
+      "risk_domain": "resume"
+    }
+  },
+  {
+    "id": "HIST-INC-077",
+    "text": "A previous disconnect incident was resolved by reconciling external state before recovering the session. Restarting before reconciliation was avoided.",
+    "metadata": {
+      "source_type": "history",
+      "authority": "ops",
+      "version": "1",
+      "environment": "production",
+      "updated_at": "$NOW",
+      "ttl_seconds": "31536000",
+      "risk_domain": "service_recovery",
+      "incident_id": "INC-077"
+    }
+  }
+]

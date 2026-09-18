@@ -1,0 +1,20 @@
+[
+  {
+    "id": "STATE-INC-104",
+    "text": "incident_id=INC-104 connection=DISCONNECTED reconciliation=INCOMPLETE service=RUNNING health=DEGRADED outstanding=UNKNOWN",
+    "metadata": {
+      "source_type": "live_state",
+      "authority": "runtime",
+      "version": "1",
+      "environment": "production",
+      "incident_id": "INC-104",
+      "updated_at": "$NOW",
+      "ttl_seconds": "300",
+      "connection": "DISCONNECTED",
+      "reconciliation": "INCOMPLETE",
+      "service": "RUNNING",
+      "health": "DEGRADED",
+      "outstanding": "UNKNOWN"
+    }
+  }
+]

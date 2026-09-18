@@ -13,6 +13,12 @@ class EvaluationRequest(BaseModel):
     context: DecisionContext
 
 
+class MossEvaluationRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    intent: ActionIntent
+
+
 class EvaluationResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

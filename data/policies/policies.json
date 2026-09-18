@@ -1,0 +1,54 @@
+[
+  {
+    "id": "POL-RESTART-001",
+    "text": "Restart is prohibited while reconciliation state is incomplete or unknown. Restart may proceed only after reconciliation is complete.",
+    "metadata": {
+      "source_type": "policy",
+      "authority": "system",
+      "version": "4",
+      "environment": "production",
+      "updated_at": "$NOW",
+      "ttl_seconds": "31536000",
+      "risk_domain": "service_recovery"
+    }
+  },
+  {
+    "id": "POL-RESUME-001",
+    "text": "Operations may resume only when connection is connected, reconciliation is complete, and service health is healthy.",
+    "metadata": {
+      "source_type": "policy",
+      "authority": "system",
+      "version": "3",
+      "environment": "production",
+      "updated_at": "$NOW",
+      "ttl_seconds": "31536000",
+      "risk_domain": "service_recovery"
+    }
+  },
+  {
+    "id": "POL-RECON-001",
+    "text": "Reconciliation is the required first recovery action when external state is unknown or incomplete.",
+    "metadata": {
+      "source_type": "policy",
+      "authority": "system",
+      "version": "2",
+      "environment": "production",
+      "updated_at": "$NOW",
+      "ttl_seconds": "31536000",
+      "risk_domain": "reconciliation"
+    }
+  },
+  {
+    "id": "POL-AUTH-001",
+    "text": "High-impact actions require current operational state from runtime authority and policy from system authority. Missing trusted context cannot authorize an action.",
+    "metadata": {
+      "source_type": "policy",
+      "authority": "system",
+      "version": "2",
+      "environment": "production",
+      "updated_at": "$NOW",
+      "ttl_seconds": "31536000",
+      "risk_domain": "context_authority"
+    }
+  }
+]

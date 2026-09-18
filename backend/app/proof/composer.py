@@ -15,9 +15,16 @@ class ProofComposer:
         action: NormalizedAction,
         context: DecisionContext,
         decision: PolicyDecision,
+        *,
+        evidence: tuple[EvidenceFact, ...] | None = None,
+        latency: LatencyBreakdown | None = None,
     ) -> ProofPacket:
-        evidence = self._evidence_from_context(context)
-        proof_id = self._proof_id(action, context, decision)
+        proof_evidence = (
+            evidence
+            if evidence is not None
+            else self._evidence_from_context(context)
+        )
+        proof_id = self._proof_id(action, context, decision, proof_evidence)
 
         return ProofPacket(
             proof_id=proof_id,
@@ -26,10 +33,10 @@ class ProofComposer:
             risk=action.impact,
             decision=decision.status,
             decision_code=decision.code,
-            evidence=evidence,
+            evidence=proof_evidence,
             matched_policy=decision.matched_rule,
             safe_next_action=decision.recommended_next_action,
-            latency=LatencyBreakdown(),
+            latency=latency or LatencyBreakdown(),
         )
 
     @staticmethod
@@ -52,11 +59,13 @@ class ProofComposer:
         action: NormalizedAction,
         context: DecisionContext,
         decision: PolicyDecision,
+        evidence: tuple[EvidenceFact, ...],
     ) -> str:
         canonical = {
             "action": action.model_dump(mode="json"),
             "context": context.model_dump(mode="json"),
             "decision": decision.model_dump(mode="json"),
+            "evidence": [item.model_dump(mode="json") for item in evidence],
         }
         payload = json.dumps(canonical, sort_keys=True, separators=(",", ":")).encode()
         digest = hashlib.sha256(payload).hexdigest()[:12].upper()
