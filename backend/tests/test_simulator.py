@@ -42,3 +42,35 @@ def test_restart_transition_changes_only_service_state() -> None:
     assert updated.connection is state.connection
     assert updated.reconciliation is state.reconciliation
     assert updated.health is state.health
+
+def test_connection_recovery_transition_restores_connection_and_health() -> None:
+    state = SimulatorState(
+        connection=ConnectionState.DISCONNECTED,
+        reconciliation=ReconciliationState.COMPLETE,
+        service=ServiceState.RUNNING,
+        health=HealthState.DEGRADED,
+        outstanding=OutstandingState.CLEAR,
+    )
+
+    updated = Simulator().transition(state, Operation.RECOVER_CONNECTION)
+
+    assert updated.connection is ConnectionState.CONNECTED
+    assert updated.health is HealthState.HEALTHY
+    assert updated.reconciliation is ReconciliationState.COMPLETE
+
+
+def test_resume_transition_restores_running_healthy_state() -> None:
+    state = SimulatorState(
+        connection=ConnectionState.CONNECTED,
+        reconciliation=ReconciliationState.COMPLETE,
+        service=ServiceState.STOPPED,
+        health=HealthState.DEGRADED,
+        outstanding=OutstandingState.CLEAR,
+    )
+
+    updated = Simulator().transition(state, Operation.RESUME)
+
+    assert updated.service is ServiceState.RUNNING
+    assert updated.health is HealthState.HEALTHY
+    assert updated.connection is ConnectionState.CONNECTED
+
