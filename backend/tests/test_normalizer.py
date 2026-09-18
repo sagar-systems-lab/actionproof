@@ -52,3 +52,20 @@ def test_timestamp_requires_timezone() -> None:
             incident_id="INC-107",
             timestamp=datetime(2026, 9, 18, 8, 15),
         )
+
+@pytest.mark.parametrize(
+    ("text", "expected_operation"),
+    [
+        ("Run reconciliation.", Operation.RECONCILE),
+        ("Recover the connection.", Operation.RECOVER_CONNECTION),
+        ("Resume operations.", Operation.RESUME),
+    ],
+)
+def test_normalizes_supported_control_actions(
+    text: str,
+    expected_operation: Operation,
+    restart_intent: ActionIntent,
+) -> None:
+    action = ActionNormalizer().normalize(restart_intent.model_copy(update={"text": text}))
+    assert action.operation is expected_operation
+
