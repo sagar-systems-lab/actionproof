@@ -310,8 +310,7 @@ export default function App() {
         </div>
 
         <div className="header-actions">
-          <button type="button" className="header-button">Docs</button>
-          <button type="button" className="header-button">Trace</button>
+          <span className="header-runtime">prototype</span>
           <span className="header-divider" />
           <span className="header-user">local</span>
         </div>
