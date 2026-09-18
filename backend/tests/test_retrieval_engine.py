@@ -5,7 +5,7 @@ from app.models.decision import DecisionCode, DecisionStatus
 from app.retrieval.engine import RetrievalActionProofEngine
 from app.retrieval.retriever import MossContextRetriever
 
-from retrieval_fakes import FakeMossBackend
+from tests.retrieval_fakes import FakeMossBackend
 
 
 def test_retrieval_engine_blocks_unsafe_restart_with_real_evidence_shape(
