@@ -80,3 +80,68 @@ def test_missing_policy_fails_closed(
 
     assert decision.status is DecisionStatus.BLOCK
     assert decision.code is DecisionCode.BLOCK_POLICY_UNAVAILABLE
+
+def test_connection_recovery_requires_reconciliation(
+    restart_intent: ActionIntent,
+    unsafe_context: DecisionContext,
+) -> None:
+    action = ActionNormalizer().normalize(
+        restart_intent.model_copy(update={"text": "Recover the connection."})
+    )
+    decision = PolicyEngine().evaluate(action, unsafe_context)
+
+    assert decision.status is DecisionStatus.BLOCK
+    assert decision.code is DecisionCode.BLOCK_RECONCILIATION_REQUIRED
+
+
+def test_connection_recovery_is_allowed_after_reconciliation(
+    restart_intent: ActionIntent,
+    safe_context: DecisionContext,
+) -> None:
+    action = ActionNormalizer().normalize(
+        restart_intent.model_copy(update={"text": "Recover the connection."})
+    )
+    decision = PolicyEngine().evaluate(action, safe_context)
+
+    assert decision.status is DecisionStatus.ALLOW
+    assert decision.code is DecisionCode.ALLOW_SAFE_STATE
+
+
+def test_resume_is_blocked_from_unsafe_state(
+    restart_intent: ActionIntent,
+    unsafe_context: DecisionContext,
+) -> None:
+    action = ActionNormalizer().normalize(
+        restart_intent.model_copy(update={"text": "Resume operations."})
+    )
+    decision = PolicyEngine().evaluate(action, unsafe_context)
+
+    assert decision.status is DecisionStatus.BLOCK
+    assert decision.code is DecisionCode.BLOCK_UNSAFE_STATE
+
+
+def test_resume_is_allowed_from_safe_state(
+    restart_intent: ActionIntent,
+    safe_context: DecisionContext,
+) -> None:
+    action = ActionNormalizer().normalize(
+        restart_intent.model_copy(update={"text": "Resume operations."})
+    )
+    decision = PolicyEngine().evaluate(action, safe_context)
+
+    assert decision.status is DecisionStatus.ALLOW
+    assert decision.code is DecisionCode.ALLOW_SAFE_STATE
+
+
+def test_reconciliation_action_is_allowed(
+    restart_intent: ActionIntent,
+    unsafe_context: DecisionContext,
+) -> None:
+    action = ActionNormalizer().normalize(
+        restart_intent.model_copy(update={"text": "Run reconciliation."})
+    )
+    decision = PolicyEngine().evaluate(action, unsafe_context)
+
+    assert decision.status is DecisionStatus.ALLOW
+    assert decision.code is DecisionCode.ALLOW_SAFE_STATE
+
