@@ -2,6 +2,19 @@
 
 ActionProof sits between an AI agent and a protected tool.
 
+```mermaid
+flowchart TD
+    A[AI agent] --> B[ActionProof]
+    B --> C[Moss retrieval]
+    C --> D[Evidence validation]
+    D --> E[Deterministic policy]
+    E --> F{ALLOW / CONFIRM / BLOCK}
+    F -->|ALLOW| G[Protected tool]
+    G --> H[Postflight verification]
+    H --> I[Updated live state]
+    I --> C
+```
+
 ```text
 Agent
   |
