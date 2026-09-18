@@ -90,6 +90,15 @@ export default function LatencyLab({ result, showingFinal }: Props) {
     try {
       setJob(await startBenchmark(iterations, scenario))
     } catch {
+      try {
+        const current = await getCurrentBenchmark()
+        if (current.state === 'running') {
+          setJob(current)
+          return
+        }
+      } catch {
+        // Fall through to the product-level error below.
+      }
       setError('Benchmark could not start. Check runtime health and try again.')
     }
   }
